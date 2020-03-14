@@ -37,7 +37,7 @@ class WigglerRadiationSimulator():
             jv2pm1 = jv2pp1
         return self.alpha*self.harmonic**2*self.beam.gamma**2\
             * self.wiggler.N_periods**2\
-            / A**2*L*np.absolute(2*self.beam.gamma*sum1
+            / A**2*L*np.absolute(2*self.beam.gamma*theta_x*sum1
                                  - self.wiggler.K_peak*(sum2+sum3))**2\
             * self.lambda1_um/lambda_um**2
 
