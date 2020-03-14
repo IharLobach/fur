@@ -26,10 +26,15 @@ class WigglerRadiationSimulator():
         sum1 = 0
         sum2 = 0
         sum3 = 0
+        p = -self.bessel_cutoff
+        jv2pm1 = jv(self.harmonic+2*p-1, X)
         for p in range(-self.bessel_cutoff, self.bessel_cutoff+1):
-            sum1 += jv(self.harmonic+2*p, X)*jv(p, Y)
-            sum2 += jv(self.harmonic+2*p-1, X)*jv(p, Y)
-            sum3 += jv(self.harmonic+2*p+1, X)*jv(p, Y)
+            jvpY = jv(p, Y)
+            sum1 += jv(self.harmonic+2*p, X)*jvpY
+            sum2 += jv2pm1*jvpY
+            jv2pp1 = jv(self.harmonic+2*p+1, X)
+            sum3 += jv2pp1*jvpY
+            jv2pm1 = jv2pp1
         return self.alpha*self.harmonic**2*self.beam.gamma**2\
             * self.wiggler.N_periods**2\
             / A**2*L*np.absolute(2*self.beam.gamma*sum1
