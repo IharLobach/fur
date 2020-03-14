@@ -1,5 +1,6 @@
 import os
 import sys
+from datetime import datetime
 from fur.config_requests import get_from_config
 data_folder = get_from_config("data_folder")
 shifts_folder = os.path.join(data_folder, 'shifts')
@@ -57,3 +58,9 @@ class PathAssistant():
 
     def get_waveforms_dir(self):
         return WorkingDirectory(self.waveforms_folder_path)
+
+    def get_datetime(self, waveform_name):
+        _, day_str, _, time_str = waveform_name.split('_')
+        time_str = time_str.split('.')[0]
+        datetime_str = day_str+' '+time_str
+        return datetime.strptime(datetime_str, "%Y-%m-%d %H%M%S")
