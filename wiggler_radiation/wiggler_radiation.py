@@ -51,3 +51,7 @@ class WigglerRadiationSimulator():
                    if self.aperture.accepted(x, y) else 0 for x, y in
                    zip(self.aperture.mesh_xs, self.aperture.mesh_ys)]
         return self.aperture.step**2*sum(Ih_vals)
+
+    def dev(self):
+
+

@@ -14,7 +14,7 @@ class EllipticAperture():
         self.theta_y_max = theta_max/np.sqrt(theta_max)
         self.mesh_size_1D = mesh_size_1D
         if self.mesh_size_1D:
-            self.step = 2*theta_max/mesh_size_1D
+            self.step = 2*theta_max/(mesh_size_1D-1)
             self.x_range = np.linspace(-self.theta_x_max, self.theta_x_max,
                                        mesh_size_1D)+self.step/2
             self.y_range = np.linspace(-self.theta_y_max, self.theta_y_max,
