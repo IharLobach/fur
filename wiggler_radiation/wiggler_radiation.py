@@ -42,6 +42,7 @@ class WigglerRadiationSimulator():
                             ' WigglerRadiationSimulator is not defined.')
         if self.aperture.mesh_size_1D is None:
             raise TypeError("Aperture's mesh is not defined.")
-        Ih_vals = [self.calc_Ih_1el(lambda_um, x, y) for x, y in
+        Ih_vals = [self.calc_Ih_1el(lambda_um, x, y)
+                   if self.aperture.accepted(x, y) else 0 for x, y in
                    zip(self.aperture.mesh_xs, self.aperture.mesh_ys)]
         return self.aperture.step**2*sum(Ih_vals)
