@@ -24,9 +24,12 @@ class WorkingDirectory():
 class PathAssistant():
     def __init__(self, shift_fodler_name, ignore_files=None):
         self.shift_folder_name = shift_fodler_name
+        self.shift_dir = os.path.join(shifts_folder,
+                                      self.shift_folder_name)
+        self.shift_results_dir = os.path.join(self.shift_dir,
+                                              "results")
         self.waveforms_folder_path = \
-            os.path.join(shifts_folder,
-                         self.shift_folder_name, "waveforms")
+            os.path.join(self.shift_dir, "waveforms")
         self.ignore_files = ['desktop.ini']
         if ignore_files:
             self.ignore_files += ignore_files
@@ -58,6 +61,9 @@ class PathAssistant():
 
     def get_waveforms_dir(self):
         return WorkingDirectory(self.waveforms_folder_path)
+
+    def get_results_dir(self):
+        return WorkingDirectory(self.shift_results_dir)
 
     def get_datetime(self, waveform_name):
         _, day_str, _, time_str = waveform_name.split('_')

@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.signal
 from sklearn import linear_model
+import matplotlib.pyplot as plt
 
 
 def get_fitlered_signal(signal, window_length=101, polyorder=3):
@@ -42,13 +43,34 @@ def get_period_from_trig_times(trig_times):
 
 def get_period(signal, sampling_time=1, relative_trigger_level=0.5,
                filter_window_length=101, filter_polyorder=3,
-               resampling_factor=5):
+               resampling_factor=10, testing=False):
+    if testing:
+        n_test = 3333*10
+        n1_test = 3333*1000
+        signal = signal[n1_test:2*n1_test]
+    if testing:
+        plt.plot(signal[:n_test])
+        plt.title("Original signal")
+        plt.show()
     filtered_signal = get_fitlered_signal(signal, filter_window_length,
                                           filter_polyorder)
+    if testing:
+        plt.plot(filtered_signal[:n_test])
+        plt.title("Filtered signal")
+        plt.show()
     reduced_data = get_reduced_data(filtered_signal, resampling_factor)
+    if testing:
+        plt.plot(reduced_data[:int(n_test/resampling_factor)])
+        plt.title("Reduced data")
+        plt.show()
     absolute_trig_level = \
         get_absolute_trig_level_from_relative(reduced_data,
                                               relative_trigger_level)
+    if testing:
+        print("Absolute trigger level = {:.3f}".format(absolute_trig_level))
     trig_times = get_trig_times(reduced_data, absolute_trig_level)
+    if testing:
+        plt.plot(trig_times)
+        plt.show()
     period = get_period_from_trig_times(trig_times)
     return resampling_factor*sampling_time*period
