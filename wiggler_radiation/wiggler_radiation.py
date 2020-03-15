@@ -56,8 +56,8 @@ class WigglerRadiationSimulator():
     def calc_Ih_on_mesh(self):
         x_2D = np.tile(self.x_range, (self.n_y, 1))
         y_2D = np.tile(self.y_range.reshape(-1, 1), (1, self.n_x))
-        r2_2D = x_2D**2+y_2D**2
-        A = self.wiggler.aux_const+self.beam.gamma**2*r2_2D
+        r2_2D = self.beam.gamma**2*(x_2D**2+y_2D**2)
+        A = self.wiggler.aux_const+r2_2D
         Y = self.harmonic*self.wiggler.K_peak**2/4/A
         X = 2*self.harmonic*self.beam.gamma*self.wiggler.K_peak*x_2D/A
         sum1 = 0
@@ -78,10 +78,12 @@ class WigglerRadiationSimulator():
                                - self.wiggler.K_peak*(sum2+sum3))**2\
             * self.lambda1_um
         dw_arr = self.lambda1_um/self.lambda_range-1
-        L = [sinc(self.wiggler.N_periods*(r2_2D+dw*A)/self.wiggler.aux_const)\
+        L = [(sinc(self.wiggler.N_periods*(r2_2D+dw*A)/self.wiggler.aux_const)
+              / sinc((r2_2D+dw*A)/self.wiggler.aux_const))
              ** 2 / l**2 for dw, l in zip(dw_arr, self.lambda_range)]
         L = np.asarray(L)
-        return bessel_part*L
+        self.res = bessel_part*L
+        return self.res
 
 
 
