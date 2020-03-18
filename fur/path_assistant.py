@@ -66,7 +66,11 @@ class PathAssistant():
         return WorkingDirectory(self.shift_results_dir)
 
     def get_datetime(self, waveform_name):
-        _, day_str, _, time_str = waveform_name.split('_')
-        time_str = time_str.split('.')[0]
-        datetime_str = day_str+' '+time_str
-        return datetime.strptime(datetime_str, "%Y-%m-%d %H%M%S")
+        try:
+            _, day_str, _, time_str = waveform_name.split('_')
+            time_str = time_str.split('.')[0]
+            datetime_str = day_str+' '+time_str
+            return datetime.strptime(datetime_str, "%Y-%m-%d %H%M%S")
+        except Exception as e:
+            print("Exceptino happened in get_datetime('{}')" \
+                  .format(waveform_name), e)
