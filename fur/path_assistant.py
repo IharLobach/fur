@@ -30,6 +30,7 @@ class PathAssistant():
                                               "results")
         self.waveforms_folder_path = \
             os.path.join(self.shift_dir, "waveforms")
+        self.acnet_data_dir = os.path.join(self.shift_dir, "acnet_data")
         self.ignore_files = ['desktop.ini']
         if ignore_files:
             self.ignore_files += ignore_files
@@ -65,6 +66,9 @@ class PathAssistant():
     def get_results_dir(self):
         return WorkingDirectory(self.shift_results_dir)
 
+    def get_acnet_data_dir(self):
+        return WorkingDirectory(self.acnet_data_dir)
+
     def get_datetime(self, waveform_name):
         try:
             _, day_str, _, time_str = waveform_name.split('_')
@@ -72,5 +76,6 @@ class PathAssistant():
             datetime_str = day_str+' '+time_str
             return datetime.strptime(datetime_str, "%Y-%m-%d %H%M%S")
         except Exception as e:
-            print("Exceptino happened in get_datetime('{}')" \
+            print("Exceptino happened in get_datetime('{}')"
                   .format(waveform_name), e)
+
