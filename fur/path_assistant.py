@@ -1,8 +1,9 @@
 import os
 import sys
 from datetime import datetime
-from fur.config_requests import get_from_config
-data_folder = get_from_config("data_folder")
+import pandas as pd
+from config import config
+data_folder = config["data_folder"]
 shifts_folder = os.path.join(data_folder, 'shifts')
 shift_folders = os.listdir(shifts_folder)
 
@@ -31,6 +32,7 @@ class PathAssistant():
         self.waveforms_folder_path = \
             os.path.join(self.shift_dir, "waveforms")
         self.acnet_data_dir = os.path.join(self.shift_dir, "acnet_data")
+        self.bpm_data_dir = os.path.join(self.shift_dir, "bunch_profile_meas")
         self.ignore_files = ['desktop.ini']
         if ignore_files:
             self.ignore_files += ignore_files
@@ -69,6 +71,9 @@ class PathAssistant():
     def get_acnet_data_dir(self):
         return WorkingDirectory(self.acnet_data_dir)
 
+    def get_bpm_data_dir(self):
+        return WorkingDirectory(self.bpm_data_dir)
+
     def get_datetime(self, waveform_name):
         try:
             _, day_str, _, time_str = waveform_name.split('_')
@@ -76,6 +81,30 @@ class PathAssistant():
             datetime_str = day_str+' '+time_str
             return datetime.strptime(datetime_str, "%Y-%m-%d %H%M%S")
         except Exception as e:
-            print("Exceptino happened in get_datetime('{}')"
+            print("Exception happened in get_datetime('{}')"
                   .format(waveform_name), e)
 
+    def get_bpm_files_df(self):
+        bpm_wf_files = [f for f in os.listdir(self.bpm_data_dir)
+                        if f != 'log.db']
+        bpm_data_dir = self.get_bpm_data_dir()
+
+        def string_to_datetime(s):
+            return datetime.strptime(s,
+                                     "bunch_profile_%m-%d-%Y_%H_%M_%S_%f.csv")
+
+        bpm_data_df = pd.DataFrame(
+            {"file_name": bpm_wf_files,
+             "file_path": [bpm_data_dir.fi(f) for f in bpm_wf_files],
+             "file_datetime": [string_to_datetime(f) for f in bpm_wf_files]})
+        return bpm_data_df
+
+    def get_acnet_data_df(self, file_name):
+        acnet_data_dir = self.get_acnet_data_dir()
+        return pd.read_csv(acnet_data_dir.fi(file_name), index_col=0, parse_dates=True)
+
+    def get_fluctuations_df(self, file_name):
+        results_dir = self.get_results_dir()
+        res_df = pd.read_csv(results_dir.fi("res_df_nd_filters_data_03_10_2020.csv"), index_col=0)
+        res_df["file_datetime"] = res_df["waveform_file"].apply(self.get_datetime)
+        return res_df
