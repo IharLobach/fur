@@ -1,16 +1,6 @@
-from datetime import datetime
-import time
-import requests
-import numpy as np
-import scipy
 import pandas as pd
-import matplotlib.pyplot as plt
-import seaborn as sns
-import sys
-import os
 from acnet_reader.acnet_reader import fetch_data, get_interpolated_df,\
     fetch_interpolated_data
-import fur.path_assistant as path_assistant
 
 
 def save_acnet_data_for_fur(shift, t1, t2, file_name_to_save):
@@ -33,5 +23,5 @@ def save_acnet_data_for_fur(shift, t1, t2, file_name_to_save):
     rf_devices = ["N:IRFEAT", "N:IRFEFP", "N:IRFECG"]
     rf_data = fetch_interpolated_data(t1, t2, rf_devices)
     all_data = pd.concat([synclight_data, wcm_data, ibeam_data,
-                                     rf_phase_data, rf_data], axis=1)
+                          rf_phase_data, rf_data], axis=1)
     all_data.to_csv(acnet_data_dir.fi(file_name_to_save))
