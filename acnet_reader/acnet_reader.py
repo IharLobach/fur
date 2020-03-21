@@ -69,4 +69,4 @@ def get_interpolated_df(df, date_range):
 def fetch_interpolated_data(t1, t2, devices, freq='S'):
     date_range = pd.date_range(t1, t2, freq='S')
     df = fetch_data(t1, t2, devices)
-    return get_interpolated_df(df, date_range) 
+    return get_interpolated_df(df, date_range)
