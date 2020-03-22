@@ -97,14 +97,30 @@ class PathAssistant():
             {"file_name": bpm_wf_files,
              "file_path": [bpm_data_dir.fi(f) for f in bpm_wf_files],
              "file_datetime": [string_to_datetime(f) for f in bpm_wf_files]})
+        bpm_data_df.sort_values("file_datetime")
         return bpm_data_df
 
     def get_acnet_data_df(self, file_name):
         acnet_data_dir = self.get_acnet_data_dir()
-        return pd.read_csv(acnet_data_dir.fi(file_name), index_col=0, parse_dates=True)
+        return pd.read_csv(acnet_data_dir.fi(file_name), index_col=0,
+                           parse_dates=True)
 
     def get_fluctuations_df(self, file_name):
         results_dir = self.get_results_dir()
-        res_df = pd.read_csv(results_dir.fi("res_df_nd_filters_data_03_10_2020.csv"), index_col=0)
-        res_df["file_datetime"] = res_df["waveform_file"].apply(self.get_datetime)
+        res_df = pd.read_csv(
+            results_dir.fi(file_name),
+            index_col=0)
+        res_df["file_datetime"] = res_df["waveform_file"] \
+            .apply(self.get_datetime)
+        res_df.sort_values("file_datetime")
         return res_df
+    
+    def get_fluctuation_waveforms_df(self):
+        fluctuation_waveforms_df = pd.DataFrame({
+            "file_name": self.get_waveform_files(),
+            "file_path": self.get_waveform_paths()})
+        fluctuation_waveforms_df["file_datetime"] = \
+            fluctuation_waveforms_df["file_name"].apply(self.get_datetime)
+        fluctuation_waveforms_df.sort_values("file_datetime")
+        return fluctuation_waveforms_df
+
