@@ -6,6 +6,7 @@ from config import config
 data_folder = config["data_folder"]
 shifts_folder = os.path.join(data_folder, 'shifts')
 shift_folders = os.listdir(shifts_folder)
+additional_data_folder = os.path.join(shifts_folder, 'additional_data')
 
 
 def show_shift_folders():
@@ -73,6 +74,9 @@ class PathAssistant():
 
     def get_bpm_data_dir(self):
         return WorkingDirectory(self.bpm_data_dir)
+
+    def get_additional_data_dir(self):
+        return WorkingDirectory(additional_data_folder)
 
     def get_datetime(self, waveform_name):
         try:
