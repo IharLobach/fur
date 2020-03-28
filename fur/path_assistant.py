@@ -2,8 +2,8 @@ import os
 import sys
 from datetime import datetime
 import pandas as pd
-from config import config
-data_folder = config["data_folder"]
+from config import get_from_config, save_to_config
+data_folder = get_from_config("data_folder")
 shifts_folder = os.path.join(data_folder, 'shifts')
 shift_folders = os.listdir(shifts_folder)
 additional_data_folder = os.path.join(shifts_folder, 'additional_data')
@@ -34,6 +34,7 @@ class PathAssistant():
             os.path.join(self.shift_dir, "waveforms")
         self.acnet_data_dir = os.path.join(self.shift_dir, "acnet_data")
         self.bpm_data_dir = os.path.join(self.shift_dir, "bunch_profile_meas")
+        self.lattice_6dsim_dir = os.path.join(self.shift_dir, "6dsim")
         self.ignore_files = ['desktop.ini']
         if ignore_files:
             self.ignore_files += ignore_files
@@ -78,6 +79,9 @@ class PathAssistant():
     def get_additional_data_dir(self):
         return WorkingDirectory(additional_data_folder)
 
+    def get_6dsim_dir(self):
+        return WorkingDirectory(self.lattice_6dsim_dir)
+
     def get_datetime(self, waveform_name):
         try:
             _, day_str, _, time_str = waveform_name.split('_')
@@ -118,7 +122,7 @@ class PathAssistant():
             .apply(self.get_datetime)
         res_df.sort_values("file_datetime")
         return res_df
-    
+
     def get_fluctuation_waveforms_df(self):
         fluctuation_waveforms_df = pd.DataFrame({
             "file_name": self.get_waveform_files(),
@@ -127,4 +131,3 @@ class PathAssistant():
             fluctuation_waveforms_df["file_name"].apply(self.get_datetime)
         fluctuation_waveforms_df.sort_values("file_datetime")
         return fluctuation_waveforms_df
-
