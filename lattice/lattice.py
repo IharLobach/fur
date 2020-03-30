@@ -14,6 +14,7 @@ camera_positions = [312.3907724914158,
                     3146.9275264095036,
                     3646.7941322228266]
 camera_names = ['M1R', 'M2R', 'M3R', 'M4R', 'M4L', 'M3L', 'M2L', 'M1L']
+active_cameras = ['M1R', 'M2R', 'M3R', 'M4L', 'M3L', 'M2L', 'M1L']
 acnet_devices_X = ['N:ITC1RSH',
                    'N:ITC2RSH',
                    'N:ITC3RSH',
@@ -30,6 +31,9 @@ acnet_devices_Y = ['N:ITC1RSV',
                    'N:ITC3LSV',
                    'N:ITC2LSV',
                    'N:ITC1LSV']
+undulator_range = (1383.9, 1435.4)
+undulator_middle = np.mean(undulator_range)
+undulator_name = "Und."
 
 
 def read_lattice_file(lattice_file_path):
@@ -75,13 +79,23 @@ def read_lattice_file(lattice_file_path):
 
 def add_vertical_lines_at_camera_positions(ax, color='green'):
     for p in camera_positions:
-        ax.axvline(p, color='green')
+        ax.axvline(p, color=color)
 
 
 def annotate_camera_positions(ax):
     y_pos_annotate = np.mean(ax.get_ylim())
     for name, p in zip(camera_names, camera_positions):
         ax.annotate(name, (p, y_pos_annotate))
+
+
+def add_undulator_shaded_area(ax, color='blue'):
+    ax.axvspan(undulator_range[0], undulator_range[1],
+               alpha=0.5, color=color)
+
+
+def annotate_undulator(ax):
+    y_pos_annotate = np.mean(ax.get_ylim())
+    ax.annotate(undulator_name, (undulator_range[1], y_pos_annotate))
 
 
 def plot_lattice(lattice_df):
@@ -102,6 +116,8 @@ def plot_lattice(lattice_df):
     for ax in (ax0, ax1):
         add_vertical_lines_at_camera_positions(ax)
     annotate_camera_positions(ax1)
+    add_undulator_shaded_area(ax=ax1)
+    annotate_undulator(ax1)
     plt.show()
 
 
@@ -116,9 +132,11 @@ def show_sigma_fit(lattice_df, cameras_df, axis, emittance_um, dpp=None):
     elif axis == "X":
         dispersion_cm = lattice_df["Dispersion_cm_X"]
         dpp_ = dpp
+        s = "dp/p = {:.3e}".format(dpp)
     elif axis == "Y":
         dispersion_cm = 0
         dpp_ = 0
+        s = ''
     fig, ax = plt.subplots(figsize=(20, 7.5))
     ax.plot(lattice_df["S_cm"],
             __get_sigma_um(
@@ -127,15 +145,50 @@ def show_sigma_fit(lattice_df, cameras_df, axis, emittance_um, dpp=None):
                 dispersion_cm,
                 dpp_),
             label="sigma_um_"+axis)
-    no_m4r = cameras_df[cameras_df["Name"] != "M4R"]
+    no_m4r = cameras_df[cameras_df["Name"].isin(active_cameras)]
     add_vertical_lines_at_camera_positions(ax)
     annotate_camera_positions(ax)
     ax.plot(no_m4r["S_cm"], no_m4r["Measured_sigma_um_"+axis],
             marker='o', linestyle='none', label="Measured_sigma_um_"+axis)
     fs = 16
     ax.set_ylabel("sigma_um_"+axis, fontsize=fs)
+    ax.set_xlabel("S_cm")
+    add_undulator_shaded_area(ax)
+    annotate_undulator(ax)
+    ax.text(0.9, 0.9, "emittance_"+axis+" = {:3f} um".format(emittance_um),
+            verticalalignment='bottom', horizontalalignment='right',
+            transform=ax.transAxes, fontsize=15)
+    ax.text(0.9, 0.8, s,
+            verticalalignment='bottom', horizontalalignment='right',
+            transform=ax.transAxes, fontsize=15)
+
+    ax.set_xlim(0, ax.get_xlim()[1])
     ax.legend()
-    return fig, ax
+    plt.show()
+
+
+def show_angle_spread_X_Y(lattice_df, e_um_x, e_um_y):
+    gamma_x_um_m1 = (1+lattice_df["Alpha_X"]**2)/lattice_df["Beta_cm_X"]/1e4
+    gamma_y_um_m1 = (1+lattice_df["Alpha_Y"]**2)/lattice_df["Beta_cm_Y"]/1e4
+    angle_spread_x = np.sqrt(e_um_x*gamma_x_um_m1)
+    angle_spread_y = np.sqrt(e_um_y*gamma_y_um_m1)
+    fig, ax = plt.subplots(figsize=(20, 7.5))
+    ax.plot(lattice_df["S_cm"], angle_spread_x, label="Angle spread X")
+    ax.plot(lattice_df["S_cm"], angle_spread_y, label="Angle spread Y")
+    ax.axhline(1/200/np.sqrt(10),
+               label="Characteristic angular spread of"
+                     " the undulator radiation",
+               color="blue")
+    add_vertical_lines_at_camera_positions(ax)
+    annotate_camera_positions(ax)
+    fs = 16
+    ax.set_ylabel("angle spread, rad", fontsize=fs)
+    ax.set_xlabel("S_cm")
+    add_undulator_shaded_area(ax)
+    annotate_undulator(ax)
+    ax.set_xlim(0, ax.get_xlim()[1])
+    ax.legend()
+    plt.show()
 
 
 def get_cameras_df(lattice_df,
@@ -160,11 +213,11 @@ def get_ey_um_least_squares(
         cameras_df, show_plot=False,
         n_estimators=10000,
         n_estimators_to_plot=50):
-    no_m4r = cameras_df[cameras_df["Name"] != "M4R"]
+    no_m4r = cameras_df[cameras_df["Name"].isin(active_cameras)]
     x = no_m4r["Beta_cm_Y"]
     X = x.values.reshape(-1, 1)
     y = no_m4r["Measured_sigma_um_Y"]**2
-    model = BaggingRegressor(LinearRegression(fit_intercept=False), 
+    model = BaggingRegressor(LinearRegression(fit_intercept=False),
                              n_estimators=n_estimators,
                              bootstrap=True)
     _ = model.fit(X, y)
@@ -201,7 +254,7 @@ def get_ey_um_least_squares(
 
 
 def get_e_um_Y_scipy_curve_fit(cameras_df):
-    no_m4r = cameras_df[cameras_df["Name"] != "M4R"]
+    no_m4r = cameras_df[cameras_df["Name"].isin(active_cameras)]
     popt, pcov = scipy.optimize.curve_fit(
         lambda beta_cm, e_um: np.sqrt(e_um*1e4*beta_cm),
         no_m4r["Beta_cm_Y"],
@@ -211,7 +264,7 @@ def get_e_um_Y_scipy_curve_fit(cameras_df):
 
 
 def get_e_um_X_scipy_curve_fit(cameras_df):
-    no_m4r = cameras_df[cameras_df["Name"] != "M4R"]
+    no_m4r = cameras_df[cameras_df["Name"].isin(active_cameras)]
 
     def f(beta_cm_dispersion_cm, e_um, dpp):
         beta_cm, disperison_cm = beta_cm_dispersion_cm
@@ -223,4 +276,34 @@ def get_e_um_X_scipy_curve_fit(cameras_df):
         no_m4r.loc[:, ["Beta_cm_X", "Dispersion_cm_X"]].values.T,
         no_m4r["Measured_sigma_um_X"])
     perr = np.sqrt(np.diag(pcov))
-    return popt, pcov, perr
+    return popt, perr
+
+
+def get_undulator_df(lattice_df, e_um_x, e_um_y, dpp):
+    undulator_df = pd.DataFrame(index=["Start", "Middle", "End"])
+    undulator_df["S_cm"] = [
+        undulator_range[0],
+        undulator_middle,
+        undulator_range[1]]
+    for col in lattice_df.columns[1:]:
+        undulator_df[col] = np.interp(undulator_df["S_cm"],
+                                      lattice_df["S_cm"],
+                                      lattice_df[col])
+    undulator_df["Sigma_um_X"] = __get_sigma_um(
+        undulator_df["Beta_cm_X"],
+        e_um_x,
+        undulator_df["Dispersion_cm_X"],
+        dpp)
+    undulator_df["Sigma_um_Y"] = __get_sigma_um(
+        undulator_df["Beta_cm_Y"],
+        e_um_y,
+        0,
+        0)
+    gamma_x_um_m1 =\
+        (1+undulator_df["Alpha_X"]**2)/undulator_df["Beta_cm_X"]/1e4
+    gamma_y_um_m1 =\
+        (1+undulator_df["Alpha_Y"]**2)/undulator_df["Beta_cm_Y"]/1e4
+    undulator_df["Angle_spread_rad_X"] = np.sqrt(e_um_x*gamma_x_um_m1)
+    undulator_df["Angle_spread_rad_Y"] = np.sqrt(e_um_y*gamma_y_um_m1)
+    return undulator_df
+

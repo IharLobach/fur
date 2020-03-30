@@ -1,5 +1,4 @@
 .vscode/
-config.json
 **/__pycache__
 env/
 test_plotly_express/
