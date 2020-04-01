@@ -7,6 +7,12 @@ data_folder = get_from_config("data_folder")
 shifts_folder = os.path.join(data_folder, 'shifts')
 shift_folders = os.listdir(shifts_folder)
 additional_data_folder = os.path.join(shifts_folder, 'additional_data')
+srw_precalculated_spectrum_folder = \
+    os.path.join(data_folder, "SRW_SLAC_undulator_spectrum")
+srw_Ex_3D_file_path = os.path.join(
+    srw_precalculated_spectrum_folder, "Ex_3D.npy")
+srw_Ey_3D_file_path = os.path.join(
+    srw_precalculated_spectrum_folder, "Ey_3D.npy")
 
 
 def show_shift_folders():
