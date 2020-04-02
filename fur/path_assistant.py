@@ -137,3 +137,7 @@ class PathAssistant():
             fluctuation_waveforms_df["file_name"].apply(self.get_datetime)
         fluctuation_waveforms_df.sort_values("file_datetime")
         return fluctuation_waveforms_df
+
+
+def get_srw_precalculated_spectrum_dir():
+    return WorkingDirectory(srw_precalculated_spectrum_folder)
