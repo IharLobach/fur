@@ -43,7 +43,7 @@ def get_period_from_trig_times(trig_times):
 
 def get_period(signal, sampling_time=1, relative_trigger_level=0.5,
                filter_window_length=101, filter_polyorder=3,
-               resampling_factor=10, testing=False):
+               resampling_factor=10, testing=False, output_dic=None):
     if testing:
         n_test = 3333*10
         n1_test = 3333*1000
@@ -69,6 +69,8 @@ def get_period(signal, sampling_time=1, relative_trigger_level=0.5,
     if testing:
         print("Absolute trigger level = {:.3f}".format(absolute_trig_level))
     trig_times = get_trig_times(reduced_data, absolute_trig_level)
+    if output_dic is not None:
+        output_dic["trig_times"] = resampling_factor*sampling_time*trig_times
     if testing:
         plt.plot(trig_times)
         plt.show()

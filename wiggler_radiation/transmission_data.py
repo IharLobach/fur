@@ -9,7 +9,9 @@ data_dir = os.path.join(module_directory, "spectral_transmission_data")
 mirrors_file = os.path.join(data_dir, "mirrors.csv")
 lens_file = os.path.join(data_dir, "lens.csv")
 photodiode_file = os.path.join(data_dir, "hamamatsu_photodiode_G11193.csv")
+vacuum_chamber_window_file = os.path.join(data_dir, "vacuum_chamber_window.csv")
 
+vcm_df = pd.read_csv(vacuum_chamber_window_file)
 mirrors_df = pd.read_csv(mirrors_file)
 mirrors_df['reflectance'] = mirrors_df['reflectance_percent']*0.01
 mirrors_df['wavelength_um'] = mirrors_df['wavelength_nm']*0.001
@@ -33,9 +35,14 @@ photodiode_quantum_efficiency = interp1d(photodiode_df['wavelength_um'],
                                          photodiode_df['quantum_efficiency'],
                                          bounds_error=False,
                                          fill_value=(0, 0))
+vcm_transmission = interp1d(vcm_df['wavelength_um'],
+                            vcm_df['transmission'],
+                            bounds_error=False,
+                            fill_value=(0, 0))
 
 
 def transmission_function(lambda_um):
     return mirror_reflectance(lambda_um)**2\
         * lens_transmission(lambda_um)\
-        * photodiode_quantum_efficiency(lambda_um)
+        * photodiode_quantum_efficiency(lambda_um)\
+        * vcm_transmission(lambda_um)

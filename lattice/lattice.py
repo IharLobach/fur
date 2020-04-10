@@ -279,7 +279,8 @@ def get_e_um_X_scipy_curve_fit(cameras_df):
     return popt, perr
 
 
-def get_undulator_df(lattice_df, e_um_x, e_um_y, dpp):
+def get_undulator_df(lattice_df, emittance_6D):
+    e_um_x, ex_err, e_um_y, ey_err, dpp, dpp_err = emittance_6D.values()
     undulator_df = pd.DataFrame(index=["Start", "Middle", "End"])
     undulator_df["S_cm"] = [
         undulator_range[0],
@@ -294,11 +295,16 @@ def get_undulator_df(lattice_df, e_um_x, e_um_y, dpp):
         e_um_x,
         undulator_df["Dispersion_cm_X"],
         dpp)
+    undulator_df["Sigma_um_X_err"] = 1/undulator_df["Sigma_um_X"] \
+        * (undulator_df["Beta_cm_X"]*1e4*ex_err/2
+            + (undulator_df["Dispersion_cm_X"]*1e4)**2*dpp*dpp_err)
     undulator_df["Sigma_um_Y"] = __get_sigma_um(
         undulator_df["Beta_cm_Y"],
         e_um_y,
         0,
         0)
+    undulator_df["Sigma_um_Y_err"] = 1/undulator_df["Sigma_um_Y"] \
+        * (undulator_df["Beta_cm_Y"]*1e4*ey_err/2)
     gamma_x_um_m1 =\
         (1+undulator_df["Alpha_X"]**2)/undulator_df["Beta_cm_X"]/1e4
     gamma_y_um_m1 =\
@@ -306,4 +312,3 @@ def get_undulator_df(lattice_df, e_um_x, e_um_y, dpp):
     undulator_df["Angle_spread_rad_X"] = np.sqrt(e_um_x*gamma_x_um_m1)
     undulator_df["Angle_spread_rad_Y"] = np.sqrt(e_um_y*gamma_y_um_m1)
     return undulator_df
-

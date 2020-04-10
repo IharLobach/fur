@@ -14,10 +14,14 @@ from fur.finding_period import get_period
 from fur.fluctuations import get_fluctiation_and_noise_var
 
 
-def analyze_one_dataset(shift_folder, base_name, t1, t2):
+def analyze_one_dataset(shift_folder, base_name, t1=None, t2=None,
+                        period_in=None):
     results_dir = shift_folder.get_results_dir()
-    wf_paths = [p for p in shift_folder.get_waveform_paths() if
-                (t1 < shift_folder.get_datetime(os.path.basename(p)) < t2)]
+    if (t1 is None) and (t2 is None):
+        wf_paths = shift_folder.get_waveform_paths()
+    else:   
+        wf_paths = [p for p in shift_folder.get_waveform_paths() if
+                    (t1 < shift_folder.get_datetime(os.path.basename(p)) < t2)]
     n_files = len(wf_paths)
     print("There are {} files in this data set.".format(n_files))
     res_df = pd.DataFrame(columns=["waveform_file",
@@ -31,7 +35,11 @@ def analyze_one_dataset(shift_folder, base_name, t1, t2):
         print("Started working on the file ", status)
         try:
             ch1, ch2 = read_waveform(p)
-            period = get_period(ch2)
+            if period_in is None:
+                period = get_period(ch2)
+            else:
+                period = period_in
+            print("period = {}".format(period))
             res_df.iloc[i, 1:] = get_fluctiation_and_noise_var(ch1, ch2,
                                                                period,
                                                                show_plots=True)
