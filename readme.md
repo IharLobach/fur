@@ -13,4 +13,12 @@ $ source env/bin/activate
 $ pip install -r requirements.txt
 ```
 
+Some plots use latex for text rendering. Use
+
+```
+sudo apt install texlive-full
+```
+
+to install latex on your machine, or set option `usetex=False` in the plots.
+
 ![Demo](demo.gif)

@@ -14,12 +14,14 @@ from fur.finding_period import get_period
 from fur.fluctuations import get_fluctiation_and_noise_var
 
 
-def analyze_one_dataset(shift_folder, base_name, t1=None, t2=None,
-                        period_in=None):
+def analyze_one_dataset(shift_folder, dumped_file_name, t1=None, t2=None,
+                        period_in=None, csv=False, nbins=1000, nrows=None,
+                        filter_window_length=101, filter_polyorder=3,
+                        resampling_factor=10, testing_period=False):
     results_dir = shift_folder.get_results_dir()
     if (t1 is None) and (t2 is None):
         wf_paths = shift_folder.get_waveform_paths()
-    else:   
+    else:
         wf_paths = [p for p in shift_folder.get_waveform_paths() if
                     (t1 < shift_folder.get_datetime(os.path.basename(p)) < t2)]
     n_files = len(wf_paths)
@@ -34,15 +36,21 @@ def analyze_one_dataset(shift_folder, base_name, t1=None, t2=None,
         status = os.path.basename(p)+" ({}/{})".format(i+1, n_files)
         print("Started working on the file ", status)
         try:
-            ch1, ch2 = read_waveform(p)
+            ch1, ch2 = read_waveform(p, one_channel=False,
+                                     csv=csv, nrows=nrows)
             if period_in is None:
-                period = get_period(ch2)
+                period = get_period(ch2,
+                                    filter_window_length=filter_window_length,
+                                    filter_polyorder=filter_polyorder,
+                                    resampling_factor=resampling_factor,
+                                    testing=testing_period)
             else:
                 period = period_in
             print("period = {}".format(period))
             res_df.iloc[i, 1:] = get_fluctiation_and_noise_var(ch1, ch2,
                                                                period,
-                                                               show_plots=True)
+                                                               show_plots=True,
+                                                               n_bins=nbins)
             print("Sum amplitude = {:.3} V".format(res_df.iloc[i, 1]))
         except Exception as e:
             print("Exception happened: ", e)
@@ -52,7 +60,6 @@ def analyze_one_dataset(shift_folder, base_name, t1=None, t2=None,
         res_df.iloc[:, i] = res_df.iloc[:, i].astype(np.float32)
     if not os.path.exists(shift_folder.shift_results_dir):
         os.mkdir(shift_folder.shift_results_dir)
-    dumped_file_name = "res_df_"+base_name+".csv"
     res_df.to_csv(results_dir.fi(dumped_file_name))
     print("Results saved to {}".format(results_dir.fi(dumped_file_name)))
     plt.plot(res_df["ch2_amplitude"], res_df["var_of_ch1_amplitude"], '.')

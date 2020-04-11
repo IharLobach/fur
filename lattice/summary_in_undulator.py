@@ -16,14 +16,18 @@ import lattice.lattice as lattice
 
 def get_summary_in_undulator(lattice_file,
                              camera_sizes_X_um,
-                             camera_sizes_Y_um):
+                             camera_sizes_Y_um,
+                             dpp=None,
+                             dpp_err=0
+                             ):
     lattice_df = lattice.read_lattice_file(lattice_file)
     cameras_df = lattice.get_cameras_df(
         lattice_df,
         camera_sizes_X_um,
         camera_sizes_Y_um)
     ey_um, ey_err = lattice.get_e_um_Y_scipy_curve_fit(cameras_df)
-    popt, perr = lattice.get_e_um_X_scipy_curve_fit(cameras_df)
+    popt, perr = lattice.get_e_um_X_scipy_curve_fit(
+        cameras_df, dpp, dpp_err)
     ex_um, dpp = popt
     ex_err, dpp_err = perr
     emittance_6D = {

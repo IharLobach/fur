@@ -46,7 +46,7 @@ def get_period(signal, sampling_time=1, relative_trigger_level=0.5,
                resampling_factor=10, testing=False, output_dic=None):
     if testing:
         n_test = 3333*10
-        n1_test = 3333*1000
+        n1_test = 3333*100
         signal = signal[n1_test:2*n1_test]
     if testing:
         plt.plot(signal[:n_test])

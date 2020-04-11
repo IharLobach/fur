@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import BaggingRegressor
+from config import get_from_config
 camera_positions = [312.3907724914158,
                     847.5314240270161,
                     1146.7606367662588,
@@ -34,6 +35,11 @@ acnet_devices_Y = ['N:ITC1RSV',
 undulator_range = (1383.9, 1435.4)
 undulator_middle = np.mean(undulator_range)
 undulator_name = "Und."
+
+
+gamma = get_from_config("gamma")
+c = get_from_config("c_m/s")
+f0 = 1/get_from_config("IOTA_revolution_period")
 
 
 def read_lattice_file(lattice_file_path):
@@ -263,20 +269,32 @@ def get_e_um_Y_scipy_curve_fit(cameras_df):
     return popt[0], perr
 
 
-def get_e_um_X_scipy_curve_fit(cameras_df):
+def get_e_um_X_scipy_curve_fit(cameras_df, dpp=None, dpp_err=0):
     no_m4r = cameras_df[cameras_df["Name"].isin(active_cameras)]
+    if dpp is None:
+        def f(beta_cm_dispersion_cm, e_um, dpp):
+            beta_cm, disperison_cm = beta_cm_dispersion_cm
+            return __get_sigma_um(beta_cm, e_um,
+                                  disperison_cm, dpp)
 
-    def f(beta_cm_dispersion_cm, e_um, dpp):
-        beta_cm, disperison_cm = beta_cm_dispersion_cm
-        return __get_sigma_um(beta_cm, e_um,
-                              disperison_cm, dpp)
-
-    popt, pcov = scipy.optimize.curve_fit(
-        f,
-        no_m4r.loc[:, ["Beta_cm_X", "Dispersion_cm_X"]].values.T,
-        no_m4r["Measured_sigma_um_X"])
-    perr = np.sqrt(np.diag(pcov))
-    return popt, perr
+        popt, pcov = scipy.optimize.curve_fit(
+            f,
+            no_m4r.loc[:, ["Beta_cm_X", "Dispersion_cm_X"]].values.T,
+            no_m4r["Measured_sigma_um_X"])
+        perr = np.sqrt(np.diag(pcov))
+        return popt, perr
+    else:
+        def f(beta_cm_dispersion_cm, e_um,):
+            beta_cm, disperison_cm = beta_cm_dispersion_cm
+            return __get_sigma_um(beta_cm, e_um,
+                                  disperison_cm, dpp)
+        
+        popt, pcov = scipy.optimize.curve_fit(
+            f,
+            no_m4r.loc[:, ["Beta_cm_X", "Dispersion_cm_X"]].values.T,
+            no_m4r["Measured_sigma_um_X"])
+        perr = np.sqrt(np.diag(pcov))
+        return (popt[0], dpp), (perr[0], dpp_err)
 
 
 def get_undulator_df(lattice_df, emittance_6D):
@@ -311,4 +329,22 @@ def get_undulator_df(lattice_df, emittance_6D):
         (1+undulator_df["Alpha_Y"]**2)/undulator_df["Beta_cm_Y"]/1e4
     undulator_df["Angle_spread_rad_X"] = np.sqrt(e_um_x*gamma_x_um_m1)
     undulator_df["Angle_spread_rad_Y"] = np.sqrt(e_um_y*gamma_y_um_m1)
+    undulator_df["ex_um"] = np.ones(3)*e_um_x
+    undulator_df["ex_err"] = np.ones(3)*ex_err
+    undulator_df["ey_um"] = np.ones(3)*e_um_y
+    undulator_df["ey_err"] = np.ones(3)*ey_err
+    undulator_df["dp/p"] = np.ones(3)*dpp
+    undulator_df["dp/p_err"] = np.ones(3)*dpp_err
     return undulator_df
+
+
+def get_dpp(sigma_z_cm, Vrf_V):
+    alpha = 0.07679
+    q = 4
+    E = gamma*0.511
+    eta_s = alpha-1/gamma**2
+    Vrf = 350
+    beta = np.sqrt(1-1/gamma**2)
+    f = q*f0
+    return sigma_z_cm*1e-2/c*f*2*np.pi\
+        * np.sqrt(Vrf/(2*np.pi*1e6*E*beta**2*q*np.abs(eta_s)))
