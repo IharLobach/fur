@@ -112,7 +112,7 @@ class PathAssistant():
              "file_path": [bpm_data_dir.fi(f) for f in bpm_wf_files],
              "file_datetime": [string_to_datetime(f) for f in bpm_wf_files]})
         bpm_data_df.sort_values("file_datetime")
-        return bpm_data_df
+        return bpm_data_df.reset_index(drop=True)
 
     def get_acnet_data_df(self, file_name):
         acnet_data_dir = self.get_acnet_data_dir()
@@ -127,7 +127,7 @@ class PathAssistant():
         res_df["file_datetime"] = res_df["waveform_file"] \
             .apply(self.get_datetime)
         res_df.sort_values("file_datetime")
-        return res_df
+        return res_df.reset_index(drop=True)
 
     def get_fluctuation_waveforms_df(self):
         fluctuation_waveforms_df = pd.DataFrame({
@@ -136,7 +136,7 @@ class PathAssistant():
         fluctuation_waveforms_df["file_datetime"] = \
             fluctuation_waveforms_df["file_name"].apply(self.get_datetime)
         fluctuation_waveforms_df.sort_values("file_datetime")
-        return fluctuation_waveforms_df
+        return fluctuation_waveforms_df.reset_index(drop=True)
 
 
 def get_srw_precalculated_spectrum_dir():

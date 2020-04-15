@@ -28,24 +28,34 @@ plt.rcParams.update({'font.size': 16, 'legend.fontsize': 16})
 
 def extend_fluctuations_df_with_acnet_data(
         fluctuations_df,
-        bpm_files_df,
         acnet_data_df,
+        provided_timestamps=None,
         show_plot=False):
-    fluctuations_df.sort_values("file_datetime")
-    bpm_files_df.sort_values("file_datetime")
+    inferred_timestamps = fluctuations_df["file_datetime"]\
+        + pd.Timedelta(value=get_from_config("RS_scope_time_behind_sec"),
+                       unit='s')
+    inferred_timestamps = inferred_timestamps.apply(
+        lambda t: t.round(freq='S'))
     if show_plot:
         ax = sns.lineplot(x=acnet_data_df.index, y=acnet_data_df["N:IWCMI"])
-        ax.set_ylim(-3.5, -2.0)
-        for t in fluctuations_df["file_datetime"]:
+        for t in inferred_timestamps:
             plt.axvline(t, color="brown")
-        for t in bpm_files_df["file_datetime"]:
-            plt.axvline(t, color="green")
+        if provided_timestamps is not None:
+            for t in provided_timestamps:
+                plt.axvline(t, color="green")
+        plt.title("Brown: inferred timestamps, Green: provided timestamps")
         plt.show()
-    fluctuations_df["rounded_bpm_file_datetime"] =\
-        bpm_files_df["file_datetime"].apply(lambda t: t.round(freq='S'))
+
+    timestamps =\
+        inferred_timestamps if (provided_timestamps is None)\
+        else provided_timestamps
+    if len(timestamps) != len(fluctuations_df.index):
+        raise ValueError("Length of timestamps array is not"
+                         " equal to number of waveforms.")
+    fluctuations_df['real_datetime'] = timestamps
     acnet_addition = acnet_data_df\
         .loc[acnet_data_df.index
-             .isin(fluctuations_df["rounded_bpm_file_datetime"])]\
+             .isin(timestamps)]\
         .loc[:,
              ["N:IWCMI", "N:IBEAMA", "N:IWCMBE",
               "N:IWCMBR", "N:IWCMBF", "N:IWCMBG", "N:IRFEPA"]
@@ -87,9 +97,10 @@ def get_fluctuations_df_with_acnet_data(
         fluctuations_df_file_name,
         lattice_file_name,
         acnet_data_df_file_name=None,
-        fit_dpp=False):
+        provided_timestamps=None,
+        fit_dpp=False,
+        show_plot=False):
     results_dir = shift.get_results_dir()
-    bpm_files_df = shift.get_bpm_files_df()
     if acnet_data_df_file_name is None:
         acnet_fn = "all_acnet_data_for_"+shift.shift_folder_name+".csv"
     else:
@@ -101,7 +112,7 @@ def get_fluctuations_df_with_acnet_data(
         lattice_file_name)
 
     res_df = extend_fluctuations_df_with_acnet_data(
-        fluctuations_df, bpm_files_df, acnet_data_df)
+        fluctuations_df, acnet_data_df, provided_timestamps, show_plot)
     res_df = extend_fluctuations_df_with_bunch_size(res_df, lattice_file,
                                                     fit_dpp)
     return res_df
