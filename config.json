@@ -36,8 +36,10 @@
         ]
     ],
     "Measured_photons_per_electron": 0.008820875499988542,
-    "Predicted_photons_per_electron_wigrad": 0.009163038752354987,
+    "Predicted_photons_per_electron_wigrad": 0.011330268973952376,
     "Beam_current_to_Sum_channel_ampl_V/mA": 0.21585382217183424,
     "Beam_energy_error_MeV": 1,
-    "sum_channel_to_photoelectrons": 33922917.5183528
+    "sum_channel_to_photoelectrons": 33922917.5183528,
+    "HybridBalanceError": 0.04067333333333334,
+    "varN_error_fit": 2603607.3009714563
 }

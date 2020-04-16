@@ -17,7 +17,8 @@ from fur.fluctuations import get_fluctiation_and_noise_var
 def analyze_one_dataset(shift_folder, dumped_file_name, t1=None, t2=None,
                         period_in=None, csv=False, nbins=1000, nrows=None,
                         filter_window_length=101, filter_polyorder=3,
-                        resampling_factor=10, testing_period=False):
+                        resampling_factor=10, testing_period=False,
+                        fit_method='lstsq'):
     results_dir = shift_folder.get_results_dir()
     if (t1 is None) and (t2 is None):
         wf_paths = shift_folder.get_waveform_paths()
@@ -29,7 +30,9 @@ def analyze_one_dataset(shift_folder, dumped_file_name, t1=None, t2=None,
     res_df = pd.DataFrame(columns=["waveform_file",
                                    "ch2_amplitude",
                                    "var_of_ch1_amplitude",
-                                   "noise_var"],
+                                   "noise_var",
+                                   "var_of_ch1_amplitude_err",
+                                   "noise_var_err"],
                           index=np.arange(n_files))
     res_df["waveform_file"] = [os.path.basename(p) for p in wf_paths]
     for i, p in enumerate(wf_paths):
@@ -47,16 +50,18 @@ def analyze_one_dataset(shift_folder, dumped_file_name, t1=None, t2=None,
             else:
                 period = period_in
             print("period = {}".format(period))
-            res_df.iloc[i, 1:] = get_fluctiation_and_noise_var(ch1, ch2,
-                                                               period,
-                                                               show_plots=True,
-                                                               n_bins=nbins)
+            res_df.iloc[i, 1:] = get_fluctiation_and_noise_var(
+                ch1, ch2,
+                period,
+                show_plots=True,
+                n_bins=nbins,
+                fit_method=fit_method)
             print("Sum amplitude = {:.3} V".format(res_df.iloc[i, 1]))
         except Exception as e:
             print("Exception happened: ", e)
         print("Finished working on ", status)
     res_df["waveform_file"] = res_df["waveform_file"].astype('str')
-    for i in range(1, 4):
+    for i in range(1, len(res_df.columns)):
         res_df.iloc[:, i] = res_df.iloc[:, i].astype(np.float32)
     if not os.path.exists(shift_folder.shift_results_dir):
         os.mkdir(shift_folder.shift_results_dir)
