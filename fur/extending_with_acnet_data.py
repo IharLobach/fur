@@ -38,10 +38,16 @@ def extend_fluctuations_df_with_acnet_data(
         lambda t: t.round(freq='S'))
     if show_plot:
         ax = sns.lineplot(x=acnet_data_df.index, y=acnet_data_df["N:IWCMI"])
-        for t in inferred_timestamps:
+        y_pos_annotate = np.mean(ax.get_ylim())
+        for i, t in enumerate(inferred_timestamps):
+            if i < (len(inferred_timestamps)-1):
+                if (inferred_timestamps[i+1]-t).total_seconds() > 120:
+                    ax.annotate(str(i), (t, y_pos_annotate))
+            else:
+                ax.annotate(str(i), (t, y_pos_annotate))
             plt.axvline(t, color="brown")
         if provided_timestamps is not None:
-            for t in provided_timestamps:
+            for i, t in enumerate(provided_timestamps):
                 plt.axvline(t, color="green")
         plt.title("Brown: inferred timestamps, Green: provided timestamps")
         plt.show()
@@ -113,6 +119,26 @@ def get_fluctuations_df_with_acnet_data(
 
     res_df = extend_fluctuations_df_with_acnet_data(
         fluctuations_df, acnet_data_df, provided_timestamps, show_plot)
+    res_df = extend_fluctuations_df_with_bunch_size(res_df, lattice_file,
+                                                    fit_dpp)
+    return res_df
+
+
+def get_acnet_df_with_bunch_sizes(
+        shift,
+        lattice_file_name,
+        acnet_data_df,
+        fit_dpp=False):
+    results_dir = shift.get_results_dir()
+    lattice_file = shift.get_6dsim_dir().fi(
+        lattice_file_name)
+    res_df = acnet_data_df
+    res_df["N:IWCMI_recalibrated_to_IWCMI_absolute"] =\
+        get_from_config("IWCMI_to_WCM_ABSOLUTE")\
+        * res_df["N:IWCMI"]
+    res_df["N:IBEAM_recalibrated_to_IWCMI_absolute"] =\
+        get_from_config("IBEAM_to_WCM_ABSOLUTE")\
+        * res_df["N:IBEAMA"]
     res_df = extend_fluctuations_df_with_bunch_size(res_df, lattice_file,
                                                     fit_dpp)
     return res_df

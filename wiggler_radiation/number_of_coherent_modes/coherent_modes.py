@@ -57,7 +57,8 @@ def get_M_interpolator_sxsyEn():
     sx_range = M_dfs[0].index.values.astype(float)
     M_3d = np.asarray([m.values for m in M_dfs])
     Mxy_interpolator = RegularGridInterpolator(
-        (energies, sx_range, sy_range), M_3d)
+        (energies, sx_range, sy_range), M_3d,
+        bounds_error=False, fill_value=None)
     energies_der = (energies[1:]+energies[:-1])/2
     sx_range_der = (sx_range[1:]+sx_range[:-1])/2
     sy_range_der = (sy_range[1:]+sy_range[:-1])/2

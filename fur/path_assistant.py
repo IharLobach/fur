@@ -126,8 +126,7 @@ class PathAssistant():
             index_col=0)
         res_df["file_datetime"] = res_df["waveform_file"] \
             .apply(self.get_datetime)
-        res_df.sort_values("file_datetime")
-        return res_df.reset_index(drop=True)
+        return res_df.sort_values("file_datetime").reset_index(drop=True)
 
     def get_fluctuation_waveforms_df(self):
         fluctuation_waveforms_df = pd.DataFrame({
@@ -135,8 +134,8 @@ class PathAssistant():
             "file_path": self.get_waveform_paths()})
         fluctuation_waveforms_df["file_datetime"] = \
             fluctuation_waveforms_df["file_name"].apply(self.get_datetime)
-        fluctuation_waveforms_df.sort_values("file_datetime")
-        return fluctuation_waveforms_df.reset_index(drop=True)
+        return fluctuation_waveforms_df.sort_values("file_datetime")\
+            .reset_index(drop=True)
 
 
 def get_srw_precalculated_spectrum_dir():
