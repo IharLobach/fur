@@ -41,5 +41,6 @@
     "Beam_energy_error_MeV": 1,
     "sum_channel_to_photoelectrons": 33922917.5183528,
     "HybridBalanceError": 0.04067333333333334,
-    "varN_error_fit": 2603607.3009714563
+    "varN_error_fit": 2603607.3009714563,
+    "Qs": 0.00042158516020236085
 }

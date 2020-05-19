@@ -343,8 +343,7 @@ def get_dpp(sigma_z_cm, Vrf_V):
     q = 4
     E = gamma*0.511
     eta_s = alpha-1/gamma**2
-    Vrf = 350
     beta = np.sqrt(1-1/gamma**2)
     f = q*f0
     return sigma_z_cm*1e-2/c*f*2*np.pi\
-        * np.sqrt(Vrf/(2*np.pi*1e6*E*beta**2*q*np.abs(eta_s)))
+        * np.sqrt(Vrf_V/(2*np.pi*1e6*E*beta**2*q*np.abs(eta_s)))

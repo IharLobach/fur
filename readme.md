@@ -8,7 +8,7 @@ The python version has to be 3.6.5 for SRW to work (`pip install vinyl-srw`). Th
 
 To recreate the virtual environment with `virtualenv` do the following in the `\fur` directory:
 ```
-$ python3 -m virtualenv env
+$ python3 -m virtualenv env --python=python3.6.5
 $ source env/bin/activate
 $ pip install -r requirements.txt
 ```

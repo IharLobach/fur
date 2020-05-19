@@ -5,12 +5,15 @@ from wiggler_radiation.transmission_data import transmission_function
 from wigrad import Wiggler, WigglerRadiationSimulator
 
 
-def get_rad_mesh_tuple(config_style_mesh=None):
+def get_rad_mesh_tuple(config_style_mesh=None, zobs_in=None):
     if config_style_mesh is None:
         rad_mesh = get_from_config("radiation_mesh")
     else:
         rad_mesh = config_style_mesh
-    zobs = get_from_config("z_obs_m")
+    if zobs_in is None:
+        zobs = get_from_config("z_obs_m")
+    else:
+        zobs = zobs_in
     theta_xs = rad_mesh[0][0]/zobs
     theta_xf = rad_mesh[0][1]/zobs
     theta_ys = rad_mesh[1][0]/zobs
