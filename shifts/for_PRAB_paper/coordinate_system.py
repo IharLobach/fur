@@ -10,12 +10,14 @@ L=10
 R = L/200
 d = L-2
 axis_col = color.black
+headlength = 6*R
+headwidth = 4*R
 zaxis = arrow(pos=vec(0, 0, 0), axis=vec(
-    0, 0, d), shaftwidth=R, color=axis_col)
+    0, 0, 1.25*d), shaftwidth=R, color=axis_col, headlength=headlength, headwidth=headwidth)
 xaxis = arrow(pos=vec(0, 0, 0), axis=vec(
-    d, 0, 0), shaftwidth=R, color=axis_col)
+    d, 0, 0), shaftwidth=R, color=axis_col, headlength=headlength, headwidth=headwidth)
 yaxis = arrow(pos=vec(0, 0, 0), axis=vec(
-    0, d, 0), shaftwidth=R, color=axis_col)
+    0, 0.75*d, 0), shaftwidth=R, color=axis_col, headlength=headlength, headwidth=headwidth)
 k = 1.02
 h = 0.05*L
 text(pos=zaxis.pos+k*zaxis.axis, text='z', height=h,
@@ -92,7 +94,7 @@ for z in zs:
 
 #---------------------------------------------------
 # radiation
-cone(pos=zaxis.pos+zaxis.axis,
+cone(pos=zaxis.pos+0.9*zaxis.axis,
      axis=-zaxis.axis,
      radius=1,
      color=color.yellow,
