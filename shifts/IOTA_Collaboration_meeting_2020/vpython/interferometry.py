@@ -53,6 +53,20 @@ d2.extrusion.rotate(angle=-pi/2, axis=vec(0, 0, 1), origin=d2.pos)
 
 
 #------------------------------------------
+# Double wedge
+from wedge_vpython import Wedge
+w_sep_z = vec(0, 0, 0.25)
+w_shift_y  = vec(0, 0.25, 0)
+w_pos = 0.5*(m2.pos+bs2.pos)
+w1 = Wedge(w_pos-w_sep_z-w_shift_y)
+w1.extrusion.rotate(angle=pi/2, axis=vec(0, 1, 0), origin=w1.pos)
+w2 = Wedge(w_pos+w_sep_z+w_shift_y)
+w2.extrusion.rotate(angle=-pi/2, axis=vec(0, 1, 0), origin=w2.pos)
+w2.extrusion.rotate(angle=pi, axis=vec(0, 0, 1), origin=w2.pos)
+
+
+
+#------------------------------------------
 # labels
 kwl = dict(height=32, border=4, font='sans')
 label(pos=m1.pos,
@@ -64,3 +78,6 @@ label(pos=bs1.pos,
 label(pos=d1.pos,
       text='Detector', xoffset=20,
       yoffset=-80, space=20, **kwl)
+label(pos=w_pos,
+      text='Double wedge', xoffset=-40,
+      yoffset=80, space=20, **kwl)
