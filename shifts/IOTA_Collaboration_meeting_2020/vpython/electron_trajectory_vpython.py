@@ -7,6 +7,6 @@ class ElectronTrajectory():
         c = curve(color=color.purple, radius=radius)
         z_und_start = z_start
         z_und_end = z_end
-        zs = np.linspace(z_und_start, z_und_end, 100)
+        zs = np.linspace(z_und_start, z_und_end, 1000)
         for z in zs:
             c.append(vector(-np.cos(2*np.pi*z/period_len), 0, z))

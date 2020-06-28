@@ -17,7 +17,7 @@ zaxis = arrow(pos=vec(0, 0, 0), axis=vec(
 xaxis = arrow(pos=vec(0, 0, 0), axis=vec(
     d, 0, 0), shaftwidth=R, color=axis_col, headlength=headlength, headwidth=headwidth)
 yaxis = arrow(pos=vec(0, 0, 0), axis=vec(
-    0, 0.75*d, 0), shaftwidth=R, color=axis_col, headlength=headlength, headwidth=headwidth)
+    0, 0.6*d, 0), shaftwidth=R, color=axis_col, headlength=headlength, headwidth=headwidth)
 k = 1.02
 h = 0.05*L
 text(pos=zaxis.pos+k*zaxis.axis, text='z', height=h,
