@@ -23,8 +23,10 @@ def get_fluctiation_and_noise_var(ch1, ch2, period, n_bins=1000,
     var_ch1 = np.array([np.var(arr) for arr in df1])
     ch2_mean = df0["ch2"].apply(np.mean)
     ch2_mean = (ch2_mean-min(ch2_mean)).values
+    tbin = np.arange(len(var_ch1))*bin_size
     if output_dic is not None:
         output_dic["std_of_ch1_var"] = np.std(var_ch1)
+        output_dic['var_ch1_df'] = pd.DataFrame({"t": tbin, "var_ch1": var_ch1})
 
 
     # least squares:
@@ -52,7 +54,7 @@ def get_fluctiation_and_noise_var(ch1, ch2, period, n_bins=1000,
 
         popt, pcov = curve_fit(func, normalized_ch2_mean, var_ch1,
                                p0=(fluct_V_f, noise_var_f))
-        oise_var_f, fluct_V_f = popt
+        noise_var_f, fluct_V_f = popt
         noise_var_f_err, fluct_V_f_err = np.sqrt(np.diag(pcov))
     res = np.sqrt(max_ch1_mean_squared), fluct_V_f, noise_var_f,\
         fluct_V_f_err, noise_var_f_err
