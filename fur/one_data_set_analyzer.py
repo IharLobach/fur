@@ -18,7 +18,7 @@ def analyze_one_dataset(shift_folder, dumped_file_name, t1=None, t2=None,
                         period_in=None, csv=False, nbins=1000, nrows=None,
                         filter_window_length=101, filter_polyorder=3,
                         resampling_factor=10, testing_period=False,
-                        fit_method='lstsq'):
+                        fit_method='lstsq', cut_start=0, cut_end=0):
     results_dir = shift_folder.get_results_dir()
     if (t1 is None) and (t2 is None):
         wf_paths = shift_folder.get_waveform_paths()
@@ -41,6 +41,8 @@ def analyze_one_dataset(shift_folder, dumped_file_name, t1=None, t2=None,
         try:
             ch1, ch2 = read_waveform(p, one_channel=False,
                                      csv=csv, nrows=nrows)
+            ch1 = ch1[cut_start:-cut_end]
+            ch2 = ch2[cut_start:-cut_end]
             if period_in is None:
                 period = get_period(ch2,
                                     filter_window_length=filter_window_length,

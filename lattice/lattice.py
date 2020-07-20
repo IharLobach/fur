@@ -2,6 +2,13 @@ import numpy as np
 import scipy
 import pandas as pd
 import matplotlib.pyplot as plt
+labeb_fs = 30
+annot_fs = 20
+legend_fs = 20
+text_fs = annot_fs
+marker_size = 7
+params = {'axes.labelsize': labeb_fs}
+plt.rcParams.update(params)
 import seaborn as sns
 from sklearn.linear_model import LinearRegression
 from sklearn.ensemble import BaggingRegressor
@@ -91,7 +98,7 @@ def add_vertical_lines_at_camera_positions(ax, color='green'):
 def annotate_camera_positions(ax):
     y_pos_annotate = np.mean(ax.get_ylim())
     for name, p in zip(camera_names, camera_positions):
-        ax.annotate(name, (p, y_pos_annotate))
+        ax.annotate(name, (p, y_pos_annotate), fontsize=annot_fs)
 
 
 def add_undulator_shaded_area(ax, color='blue'):
@@ -101,18 +108,18 @@ def add_undulator_shaded_area(ax, color='blue'):
 
 def annotate_undulator(ax):
     y_pos_annotate = np.mean(ax.get_ylim())
-    ax.annotate(undulator_name, (undulator_range[1], y_pos_annotate))
+    ax.annotate(undulator_name,
+                (undulator_range[1], y_pos_annotate), fontsize=annot_fs)
 
 
 def plot_lattice(lattice_df):
     fig, (ax0, ax1) = plt.subplots(2, figsize=(20, 15))
     ax0.plot(lattice_df["S_cm"], lattice_df["Beta_cm_X"], label="Beta_cm_X")
     ax0.plot(lattice_df["S_cm"], lattice_df["Beta_cm_Y"], label="Beta_cm_Y")
-    fs = 16
-    ax0.set_ylabel("Beta_cm_X, Beta_cm_Y", fontsize=fs)
-    ax0.legend()
+    ax0.set_ylabel("Beta_cm_X, Beta_cm_Y")
+    ax0.legend(fontsize=legend_fs)
     ax1.plot(lattice_df["S_cm"], lattice_df["Dispersion_cm_X"])
-    ax1.set_ylabel("Dispersion_cm_X", fontsize=fs)
+    ax1.set_ylabel("Dispersion_cm_X")
     ax1.set_xlabel("S_cm")
     # ax2.plot(lattice_df["S_cm"], lattice_df["Alpha_X"], label="Alpha_X")
     # ax2.plot(lattice_df["S_cm"], lattice_df["Alpha_Y"], label="Alpha_Y")
@@ -155,21 +162,21 @@ def show_sigma_fit(lattice_df, cameras_df, axis, emittance_um, dpp=None):
     add_vertical_lines_at_camera_positions(ax)
     annotate_camera_positions(ax)
     ax.plot(no_m4r["S_cm"], no_m4r["Measured_sigma_um_"+axis],
-            marker='o', linestyle='none', label="Measured_sigma_um_"+axis)
-    fs = 16
-    ax.set_ylabel("sigma_um_"+axis, fontsize=fs)
+            marker='o', linestyle='none', label="Measured_sigma_um_"+axis,
+            markersize=marker_size)
+    ax.set_ylabel("sigma_um_"+axis)
     ax.set_xlabel("S_cm")
     add_undulator_shaded_area(ax)
     annotate_undulator(ax)
     ax.text(0.9, 0.9, "emittance_"+axis+" = {:3f} um".format(emittance_um),
             verticalalignment='bottom', horizontalalignment='right',
-            transform=ax.transAxes, fontsize=15)
+            transform=ax.transAxes, fontsize=text_fs)
     ax.text(0.9, 0.8, s,
             verticalalignment='bottom', horizontalalignment='right',
-            transform=ax.transAxes, fontsize=15)
+            transform=ax.transAxes, fontsize=text_fs)
 
     ax.set_xlim(0, ax.get_xlim()[1])
-    ax.legend()
+    ax.legend(fontsize=legend_fs)
     plt.show()
 
 
@@ -187,13 +194,12 @@ def show_angle_spread_X_Y(lattice_df, e_um_x, e_um_y):
                color="blue")
     add_vertical_lines_at_camera_positions(ax)
     annotate_camera_positions(ax)
-    fs = 16
-    ax.set_ylabel("angle spread, rad", fontsize=fs)
+    ax.set_ylabel("angle spread, rad")
     ax.set_xlabel("S_cm")
     add_undulator_shaded_area(ax)
     annotate_undulator(ax)
     ax.set_xlim(0, ax.get_xlim()[1])
-    ax.legend()
+    ax.legend(fontsize=legend_fs)
     plt.show()
 
 
@@ -253,7 +259,7 @@ def get_ey_um_least_squares(
             s += l+'\n'
         ax1.text(0.9, 0.5, s,
                  verticalalignment='bottom', horizontalalignment='right',
-                 transform=ax1.transAxes, fontsize=15)
+                 transform=ax1.transAxes, fontsize=text_fs)
         ax1.set_xlim(0, ax1.get_xlim()[1])
         plt.show()
     return ey_um_description

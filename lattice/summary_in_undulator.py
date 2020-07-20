@@ -3,7 +3,6 @@ import time
 import numpy as np
 import scipy
 import pandas as pd
-import matplotlib.pyplot as plt
 import seaborn as sns
 import sys
 import os
