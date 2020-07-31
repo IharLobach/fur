@@ -13,6 +13,10 @@ srw_Ex_3D_file_path = os.path.join(
     srw_precalculated_spectrum_folder, "Ex_3D.npy")
 srw_Ey_3D_file_path = os.path.join(
     srw_precalculated_spectrum_folder, "Ey_3D.npy")
+srw_Ex_3D_with_losses_file_path = os.path.join(
+    srw_precalculated_spectrum_folder, "Ex_3D_with_losses.npy")
+srw_Ey_3D_with_losses_file_path = os.path.join(
+    srw_precalculated_spectrum_folder, "Ey_3D_with_losses.npy")
 
 
 def show_shift_folders():

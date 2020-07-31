@@ -87,6 +87,14 @@ def read_lattice_file(lattice_file_path):
         "Alpha_X": data_chunks[3][1],
         "Alpha_Y": data_chunks[4][1]
     })
+    lattice_df = lattice_df.drop_duplicates("S_cm")
+    dS = lattice_df["S_cm"].diff().fillna(method='bfill')
+    dDx = lattice_df["Dispersion_cm_X"].diff().fillna(method='bfill')
+    lattice_df["dS"] = dS
+    lattice_df["dDx"] = dDx
+    lattice_df["dDx/dS"] = dDx/dS
+    # lattice_df["Alpha_X"] = -lattice_df["Beta_cm_X"].diff()/lattice_df["dS"]/2
+    # lattice_df["Alpha_Y"] = -lattice_df["Beta_cm_Y"].diff()/lattice_df["dS"]/2
     return lattice_df
 
 
@@ -180,10 +188,11 @@ def show_sigma_fit(lattice_df, cameras_df, axis, emittance_um, dpp=None):
     plt.show()
 
 
-def show_angle_spread_X_Y(lattice_df, e_um_x, e_um_y):
+def show_angle_spread_X_Y(lattice_df, e_um_x, e_um_y, dpp=0):
     gamma_x_um_m1 = (1+lattice_df["Alpha_X"]**2)/lattice_df["Beta_cm_X"]/1e4
     gamma_y_um_m1 = (1+lattice_df["Alpha_Y"]**2)/lattice_df["Beta_cm_Y"]/1e4
-    angle_spread_x = np.sqrt(e_um_x*gamma_x_um_m1)
+    angle_spread_x = np.sqrt(lattice_df["dDx/dS"]**2*dpp**2
+                             + e_um_x*gamma_x_um_m1)
     angle_spread_y = np.sqrt(e_um_y*gamma_y_um_m1)
     fig, ax = plt.subplots(figsize=(20, 7.5))
     ax.plot(lattice_df["S_cm"], angle_spread_x, label="Angle spread X")
@@ -333,7 +342,8 @@ def get_undulator_df(lattice_df, emittance_6D):
         (1+undulator_df["Alpha_X"]**2)/undulator_df["Beta_cm_X"]/1e4
     gamma_y_um_m1 =\
         (1+undulator_df["Alpha_Y"]**2)/undulator_df["Beta_cm_Y"]/1e4
-    undulator_df["Angle_spread_rad_X"] = np.sqrt(e_um_x*gamma_x_um_m1)
+    undulator_df["Angle_spread_rad_X"]\
+        = np.sqrt(undulator_df["dDx/dS"]**2*dpp**2+e_um_x*gamma_x_um_m1)
     undulator_df["Angle_spread_rad_Y"] = np.sqrt(e_um_y*gamma_y_um_m1)
     undulator_df["ex_um"] = np.ones(3)*e_um_x
     undulator_df["ex_err"] = np.ones(3)*ex_err

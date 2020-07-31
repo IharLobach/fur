@@ -77,7 +77,8 @@ part.y = 0.0
 part.z = -0.5*(numPer + 4)*undPer #- 1.3981378
 part.xp = 0 #Initial Transverse Velocities
 part.yp = 0
-part.gamma = get_from_config("gamma") #Relative Energy
+part.gamma = get_from_config("gamma")
+print("gamma = ", part.gamma) #Relative Energy
 part.relE0 = 1 #Electron Rest Mass
 part.nq = -1 #Electron Charge
 
@@ -221,6 +222,14 @@ dx/zobs*dy/zobs*dl*np.sum(np.absolute(Ey_3D)**2)
 
 # %%
 dx/zobs*dy/zobs*dl*np.sum(np.absolute(Ex_3D)**2+np.absolute(Ey_3D)**2)
+
+apply_spectral_transmittion_function = False
+print( "apply_spectral_transmittion_function = ", apply_spectral_transmittion_function)
+if apply_spectral_transmittion_function:
+    from wiggler_radiation.transmission_data import transmission_function
+    spectral_transmission = np.sqrt(transmission_function(l_list))
+    Ex_3D = spectral_transmission[:, None, None]*Ex_3D
+    Ey_3D = spectral_transmission[:, None, None]*Ey_3D
 
 
 # %%
