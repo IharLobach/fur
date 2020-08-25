@@ -21,4 +21,9 @@ sudo apt install texlive-full
 
 to install latex on your machine, or set option `usetex=False` in the plots.
 
+Some of the figures require `arial.ttf` font to be installed on the ubuntu machine. It can be achieved by running
+```shell
+sudo apt-get install --reinstall ttf-mscorefonts-installer
+```
+
 ![Demo](demo.gif)

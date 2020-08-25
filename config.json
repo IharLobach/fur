@@ -10,7 +10,8 @@
     "dt": 0.04,
     "RS_scope_time_behind_sec": 20.575844,
     "Undulator_Gap_mm": 38.15,
-    "K_peak": 1.0578246735872634,
+    "K_peak":1.0,
+    "K_peak_old": 1.0578246735872634,
     "Undulator_period_m": 0.055,
     "gamma": 188.649706458,
     "me_MeV": 0.511,
@@ -43,5 +44,6 @@
     "HybridBalanceError": 0.04067333333333334,
     "varN_error_fit": 2688549.4878735114,
     "Qs": 0.00042158516020236085,
-    "PRL_images": "/home/ilobach/PRL_fur_run2_paper/images"
+    "PRL_images": "/home/ilobach/FUR_Run2_experiment_paper/images",
+    "NominalBeamCurrent_mA": 2.0
 }

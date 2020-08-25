@@ -46,8 +46,16 @@ def generate_wr_sim_for_plotting(config_style_mesh=None):
     return wr_sim
 
 
-def generate_wr_sim_with_wigrad_results(config_style_mesh=None):
-    wiggler = Wiggler(K_peak=get_from_config("K_peak"))
+def generate_wr_sim_with_wigrad_results(config_style_mesh=None, K_peak_in=None, gamma_in=None):
+    if K_peak_in is None:
+        K_peak=get_from_config("K_peak")
+    else:
+        K_peak = K_peak_in
+    if gamma_in is None:
+        gamma = get_from_config("gamma")
+    else:
+        gamma = gamma_in
+    wiggler = Wiggler(K_peak=K_peak)
     mesh0 = get_rad_mesh_tuple(config_style_mesh)
     mesh = (mesh0[0][int(len(mesh0[0])/2):],
             mesh0[1][int(len(mesh0[1])/2):],
@@ -56,13 +64,11 @@ def generate_wr_sim_with_wigrad_results(config_style_mesh=None):
     wr_sim = WigglerRadiationSimulator(
         wiggler,
         mesh,
-        gamma=get_from_config("gamma"),
+        gamma=gamma,
         harmonics=[1, 2],
         aperture='ellipse',
-        # if False, then both polarizations are calculated separately
-        only_calc_sum_of_both_polarizations=True,
         spectral_transmission=spectral_transmission
     )
-    wr_sim.calc_photon_flux_on_meshgrid()
+    wr_sim.calc_amplitude_on_meshgrid()
     wr_sim.extend_results_using_symmetries()
     return wr_sim

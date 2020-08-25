@@ -17,6 +17,7 @@ srw_Ex_3D_with_losses_file_path = os.path.join(
     srw_precalculated_spectrum_folder, "Ex_3D_with_losses.npy")
 srw_Ey_3D_with_losses_file_path = os.path.join(
     srw_precalculated_spectrum_folder, "Ey_3D_with_losses.npy")
+prl_images_path = get_from_config("PRL_images")
 
 
 def show_shift_folders():
@@ -144,3 +145,7 @@ class PathAssistant():
 
 def get_srw_precalculated_spectrum_dir():
     return WorkingDirectory(srw_precalculated_spectrum_folder)
+
+
+def get_PRL_images_dir():
+    return WorkingDirectory(prl_images_path)

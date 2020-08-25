@@ -23,12 +23,28 @@ photodiode_df['quantum_efficiency'] =\
     photodiode_df['photo_sensitivity_A_per_W']*1.24\
     / photodiode_df['wavelength_um']
 
-mirror_reflectance = interp1d(mirrors_df['wavelength_um'],
-                              mirrors_df['reflectance'],
+x = mirrors_df['wavelength_um']
+y = mirrors_df['reflectance']
+left = x[0]-y[0]*(x[1]-x[0])/(y[1]-y[0])
+right = x.values[-1]+y.values[-1]\
+    * (x.values[-1]-x.values[-2])/(y.values[-2]-y.values[-1])
+mirrors_df_extrp = pd.concat([
+    pd.DataFrame({'wavelength_um': [left], 'reflectance':[0]}),
+    mirrors_df,
+    pd.DataFrame({'wavelength_um': [right], 'reflectance':[0]})])
+mirror_reflectance = interp1d(mirrors_df_extrp['wavelength_um'],
+                              mirrors_df_extrp['reflectance'],
                               bounds_error=False,
                               fill_value=(0, 0))
-lens_transmission = interp1d(lens_df['wavelength_um'],
-                             lens_df['transmission'],
+x = lens_df['wavelength_um']
+y = lens_df['transmission']
+left = x.values[-1]+y.values[-1]\
+    * (x.values[-1]-x.values[-2])/(y.values[-2]-y.values[-1])
+lens_df_extrp = pd.concat([
+    lens_df,
+    pd.DataFrame({'wavelength_um': [left], 'transmission':[0]})])
+lens_transmission = interp1d(lens_df_extrp['wavelength_um'],
+                             lens_df_extrp['transmission'],
                              bounds_error=False,
                              fill_value=(0, 0))
 photodiode_quantum_efficiency = interp1d(photodiode_df['wavelength_um'],

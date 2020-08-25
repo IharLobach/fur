@@ -39,3 +39,36 @@ def get_summary_in_undulator(lattice_file,
     }
     undulator_df = lattice.get_undulator_df(lattice_df, emittance_6D)
     return undulator_df, emittance_6D
+
+
+def CalcTransverseBeamParams(lattice_df, ex_um, ey_um, dpp):
+    emittance_6D = {
+        'ex_um': ex_um,
+        'ex_err': 0,
+        'ey_um': ey_um,
+        'ey_err': 0,
+        'dp/p': dpp,
+        'dp/p_err': 0
+    }
+    und_summary = lattice.get_undulator_df(lattice_df, emittance_6D)
+    #print(und_summary)
+    v = und_summary.loc['Middle', ['Beta_cm_X', 'Beta_cm_Y',
+                                   'Alpha_X', 'Alpha_Y',
+                                   'Angle_spread_rad_X', 'Angle_spread_rad_Y',
+                                   'ex_um', 'ey_um',
+                                   'Dispersion_cm_X', 'dDx/dS',
+                                   'dp/p',
+                                   'Sigma_um_X', 'Sigma_um_Y']]
+    bx, by, ax, ay, sxp, syp, ex, ey, Dx, Dxp, sp, sx, sy = v
+    bx, by, Dx = 1e4*np.array([bx, by, Dx])
+    gx, gy = (1+ax**2)/bx, (1+ay**2)/by
+    #print("sqrt(gx*ex) = ", np.sqrt(gx*ex))
+    #print("sqrt(gy*ey) = ", np.sqrt(gy*ey))
+    Sx = np.sqrt(ex/gx+(gx*Dx+Dxp*ax)**2*bx*ex*sp**2/sxp**2)
+    #print("sqrt(ex/gx) = ", np.sqrt(ex/gx))
+    Sy = np.sqrt(ey/gy)
+    dx = (ax*ex-Dx*Dxp*sp**2)/sxp**2
+    #print("ax*ex/sxp**2 = ", ax*ex/sxp**2)
+    #print("(Dx*Dxp*sp**2)/sxp**2 = ", (Dx*Dxp*sp**2)/sxp**2)
+    dy = ay/gy
+    return Sx, Sy, dx, dy, sxp, syp
