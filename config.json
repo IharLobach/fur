@@ -10,8 +10,7 @@
     "dt": 0.04,
     "RS_scope_time_behind_sec": 20.575844,
     "Undulator_Gap_mm": 38.15,
-    "K_peak":1.0,
-    "K_peak_old": 1.0578246735872634,
+    "K_peak": 1.0,
     "Undulator_period_m": 0.055,
     "gamma": 188.649706458,
     "me_MeV": 0.511,
@@ -37,7 +36,7 @@
         ]
     ],
     "Measured_photons_per_electron": 0.008820875499988542,
-    "Predicted_photons_per_electron_wigrad": 0.011330268973952376,
+    "Predicted_photons_per_electron_wigrad": 0.009125786374792258,
     "Beam_current_to_Sum_channel_ampl_V/mA": 0.21585382217183424,
     "Beam_energy_error_MeV": 1,
     "sum_channel_to_photoelectrons": 33922917.5183528,
