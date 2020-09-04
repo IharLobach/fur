@@ -41,7 +41,7 @@ def get_summary_in_undulator(lattice_file,
     return undulator_df, emittance_6D
 
 
-def CalcTransverseBeamParams(lattice_df, ex_um, ey_um, dpp):
+def CalcTransverseBeamParams(lattice_df, ex_um, ey_um, dpp, where_in_undulator='Middle'):
     emittance_6D = {
         'ex_um': ex_um,
         'ex_err': 0,
@@ -52,7 +52,7 @@ def CalcTransverseBeamParams(lattice_df, ex_um, ey_um, dpp):
     }
     und_summary = lattice.get_undulator_df(lattice_df, emittance_6D)
     #print(und_summary)
-    v = und_summary.loc['Middle', ['Beta_cm_X', 'Beta_cm_Y',
+    v = und_summary.loc[where_in_undulator, ['Beta_cm_X', 'Beta_cm_Y',
                                    'Alpha_X', 'Alpha_Y',
                                    'Angle_spread_rad_X', 'Angle_spread_rad_Y',
                                    'ex_um', 'ey_um',

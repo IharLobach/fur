@@ -44,5 +44,7 @@
     "varN_error_fit": 2688549.4878735114,
     "Qs": 0.00042158516020236085,
     "PRL_images": "/home/ilobach/FUR_Run2_experiment_paper/images",
-    "NominalBeamCurrent_mA": 2.0
+    "NominalBeamCurrent_mA": 2.0,
+    "Ku_error": 0.03,
+    "Ebeam_error_MeV": 1.0
 }
