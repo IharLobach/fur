@@ -363,3 +363,23 @@ def get_dpp(sigma_z_cm, Vrf_V):
     f = q*f0
     return sigma_z_cm*1e-2/c*f*2*np.pi\
         * np.sqrt(Vrf_V/(2*np.pi*1e6*E*beta**2*q*np.abs(eta_s)))
+
+
+def get_e_um_Y_dict(cameras_df):
+    no_m4r = cameras_df[cameras_df["Name"].isin(active_cameras)]
+    ey_vals = no_m4r["Measured_sigma_um_Y"]**2/(1e4*no_m4r["Beta_cm_Y"])
+    ey_dict = {}
+    for cam, val in zip(no_m4r["Name"], ey_vals):
+        ey_dict["e_um_Y_"+cam] = val
+    return ey_dict
+
+
+def get_e_um_X_dict(cameras_df, dpp=0):
+    no_m4r = cameras_df[cameras_df["Name"].isin(active_cameras)]
+    ex_vals = (no_m4r["Measured_sigma_um_X"]**2
+               - (1e4*no_m4r["Dispersion_cm_X"]*dpp)**2)\
+        / (1e4*no_m4r["Beta_cm_X"])
+    ex_dict = {}
+    for cam, val in zip(no_m4r["Name"], ex_vals):
+        ex_dict["e_um_X_"+cam] = val
+    return ex_dict
