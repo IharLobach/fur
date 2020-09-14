@@ -46,5 +46,6 @@
     "PRL_images": "/home/ilobach/FUR_Run2_experiment_paper/images",
     "NominalBeamCurrent_mA": 2.0,
     "Ku_error": 0.03,
-    "Ebeam_error_MeV": 1.0
+    "Ebeam_error_MeV": 1.0,
+    "integrator_amp_to_photoelectrons": 20825277.191411503
 }
