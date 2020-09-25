@@ -46,7 +46,8 @@ def generate_wr_sim_for_plotting(config_style_mesh=None):
     return wr_sim
 
 
-def generate_wr_sim_with_wigrad_results(config_style_mesh=None, K_peak_in=None, gamma_in=None):
+def generate_wr_sim_with_wigrad_results(config_style_mesh=None, K_peak_in=None, gamma_in=None, use_spectral_transmission=True, aperture='ellipse',
+return_spectral_transmission=False):
     if K_peak_in is None:
         K_peak=get_from_config("K_peak")
     else:
@@ -60,15 +61,25 @@ def generate_wr_sim_with_wigrad_results(config_style_mesh=None, K_peak_in=None, 
     mesh = (mesh0[0][int(len(mesh0[0])/2):],
             mesh0[1][int(len(mesh0[1])/2):],
             mesh0[2])
-    spectral_transmission = transmission_function(mesh[2])
+    spectral_transmission = None
+    if use_spectral_transmission:
+        spectral_transmission = transmission_function(mesh[2])
     wr_sim = WigglerRadiationSimulator(
         wiggler,
         mesh,
         gamma=gamma,
         harmonics=[1, 2],
-        aperture='ellipse',
+        aperture=aperture,
         spectral_transmission=spectral_transmission
     )
     wr_sim.calc_amplitude_on_meshgrid()
     wr_sim.extend_results_using_symmetries()
-    return wr_sim
+    if return_spectral_transmission:
+        return wr_sim, transmission_function(mesh[2])
+    else:
+        return wr_sim
+
+
+def generate_wr_sim_with_wigrad_results_and_spectral_transmission(config_style_mesh=None, K_peak_in=None, gamma_in=None):
+    return generate_wr_sim_with_wigrad_results(config_style_mesh=config_style_mesh, K_peak_in=K_peak_in, gamma_in=gamma_in, use_spectral_transmission=False, aperture=None,
+                                        return_spectral_transmission=True)

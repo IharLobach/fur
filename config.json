@@ -41,7 +41,7 @@
     "Beam_energy_error_MeV": 1,
     "sum_channel_to_photoelectrons": 33922917.5183528,
     "HybridBalanceError": 0.04067333333333334,
-    "varN_error_fit": 2688549.4878735114,
+    "varN_error_fit": 2688549.487873515,
     "Qs": 0.00042158516020236085,
     "PRL_images": "/home/ilobach/FUR_Run2_experiment_paper/images",
     "NominalBeamCurrent_mA": 2.0,
