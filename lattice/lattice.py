@@ -23,6 +23,20 @@ camera_positions = [312.3907724914158,
                     3646.7941322228266]
 camera_names = ['M1R', 'M2R', 'M3R', 'M4R', 'M4L', 'M3L', 'M2L', 'M1L']
 active_cameras = ['M1R', 'M2R', 'M3R', 'M4L', 'M3L', 'M2L', 'M1L']
+# these calibrations only make it worse:
+# calibrations = [
+#     5/0.772,
+#     5/0.77,
+#     5/0.779,
+#     5/0.78,
+#     5/0.779,
+#     5/0.824,
+#     5/0.724,
+#     5/0.838
+# ]
+# cal_av = np.mean(calibrations)
+# calibrations = np.array(calibrations)/cal_av
+
 acnet_devices_X = ['N:ITC1RSH',
                    'N:ITC2RSH',
                    'N:ITC3RSH',
