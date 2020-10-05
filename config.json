@@ -50,5 +50,8 @@
     "integrator_amp_to_photoelectrons": 20825277.191411503,
     "test_light_source_theta": 3.3055059333539795e-06,
     "noise_level_V2": 1.0282386622247593e-07,
-    "noise_level": 236652075.6511279
+    "noise_level": 236652075.6511279,
+    "ey_with_div": 0.008875000000000001,
+    "ey_without_div": 0.018875,
+    "observed_M": 4431387.88118894
 }
