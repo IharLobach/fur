@@ -5,7 +5,7 @@
     "IBEAM_to_WCM_ABSOLUTE": 0.9667369967831826,
     "Cf": 2e-12,
     "Rf": 10000,
-    "IOTA_revolution_period": 1.33e-07,
+    "IOTA_revolution_period": 1.3333333333e-07,
     "e": 1.602176634e-19,
     "dt": 0.04,
     "RS_scope_time_behind_sec": 20.575844,
