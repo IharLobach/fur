@@ -58,9 +58,7 @@ undulator_middle = np.mean(undulator_range)
 undulator_name = "Und."
 
 
-gamma = get_from_config("gamma")
-c = get_from_config("c_m/s")
-f0 = 1/get_from_config("IOTA_revolution_period")
+
 
 
 def read_lattice_file(lattice_file_path):
@@ -107,6 +105,8 @@ def read_lattice_file(lattice_file_path):
     lattice_df["dS"] = dS
     lattice_df["dDx"] = dDx
     lattice_df["dDx/dS"] = dDx/dS
+    lattice_df['Phi_X'] = lattice_df['Dispersion_cm_X']\
+        * lattice_df['Alpha_X']/lattice_df['Beta_cm_X'] + lattice_df['dDx/dS']
     # lattice_df["Alpha_X"] = -lattice_df["Beta_cm_X"].diff()/lattice_df["dS"]/2
     # lattice_df["Alpha_Y"] = -lattice_df["Beta_cm_Y"].diff()/lattice_df["dS"]/2
     return lattice_df
@@ -156,7 +156,7 @@ def plot_lattice(lattice_df):
     plt.show()
 
 
-def __get_sigma_um(beta_cm, e_um, dispersion_cm, dpp):
+def get_sigma_um(beta_cm, e_um, dispersion_cm, dpp):
     return np.sqrt(e_um*1e4*beta_cm+(1e4*dispersion_cm*dpp)**2)
 
 
@@ -174,7 +174,7 @@ def show_sigma_fit(lattice_df, cameras_df, axis, emittance_um, dpp=None):
         s = ''
     fig, ax = plt.subplots(figsize=(20, 7.5))
     ax.plot(lattice_df["S_cm"],
-            __get_sigma_um(
+            get_sigma_um(
                 lattice_df["Beta_cm_"+axis],
                 emittance_um,
                 dispersion_cm,
@@ -303,7 +303,7 @@ def get_e_um_X_scipy_curve_fit(cameras_df, dpp=None, dpp_err=0):
     if dpp is None:
         def f(beta_cm_dispersion_cm, e_um, dpp):
             beta_cm, disperison_cm = beta_cm_dispersion_cm
-            return __get_sigma_um(beta_cm, e_um,
+            return get_sigma_um(beta_cm, e_um,
                                   disperison_cm, dpp)
 
         popt, pcov = scipy.optimize.curve_fit(
@@ -315,7 +315,7 @@ def get_e_um_X_scipy_curve_fit(cameras_df, dpp=None, dpp_err=0):
     else:
         def f(beta_cm_dispersion_cm, e_um,):
             beta_cm, disperison_cm = beta_cm_dispersion_cm
-            return __get_sigma_um(beta_cm, e_um,
+            return get_sigma_um(beta_cm, e_um,
                                   disperison_cm, dpp)
         
         popt, pcov = scipy.optimize.curve_fit(
@@ -337,7 +337,7 @@ def get_undulator_df(lattice_df, emittance_6D):
         undulator_df[col] = np.interp(undulator_df["S_cm"],
                                       lattice_df["S_cm"],
                                       lattice_df[col])
-    undulator_df["Sigma_um_X"] = __get_sigma_um(
+    undulator_df["Sigma_um_X"] = get_sigma_um(
         undulator_df["Beta_cm_X"],
         e_um_x,
         undulator_df["Dispersion_cm_X"],
@@ -345,7 +345,7 @@ def get_undulator_df(lattice_df, emittance_6D):
     undulator_df["Sigma_um_X_err"] = 1/undulator_df["Sigma_um_X"] \
         * (undulator_df["Beta_cm_X"]*1e4*ex_err/2
             + (undulator_df["Dispersion_cm_X"]*1e4)**2*dpp*dpp_err)
-    undulator_df["Sigma_um_Y"] = __get_sigma_um(
+    undulator_df["Sigma_um_Y"] = get_sigma_um(
         undulator_df["Beta_cm_Y"],
         e_um_y,
         0,
@@ -368,10 +368,16 @@ def get_undulator_df(lattice_df, emittance_6D):
     return undulator_df
 
 
-def get_dpp(sigma_z_cm, Vrf_V):
-    alpha = 0.07679
-    q = 4
-    E = gamma*0.511
+c = get_from_config("c_m/s")
+f0 = 1/get_from_config("IOTA_revolution_period")
+gamma0 = get_from_config("gamma")
+e = get_from_config("e")
+me = get_from_config("me_MeV")
+alpha = get_from_config("ring_alpha")
+q = get_from_config("RF_q")
+
+def get_dpp(sigma_z_cm, Vrf_V, gamma=gamma0):
+    E = gamma*me
     eta_s = alpha-1/gamma**2
     beta = np.sqrt(1-1/gamma**2)
     f = q*f0
