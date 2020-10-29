@@ -2,6 +2,7 @@ import numpy as np
 import scipy
 import pandas as pd
 import matplotlib.pyplot as plt
+import os
 labeb_fs = 30
 annot_fs = 20
 legend_fs = 20
@@ -60,7 +61,6 @@ undulator_name = "Und."
 
 
 
-
 def read_lattice_file(lattice_file_path):
     with open(lattice_file_path) as f:
         content = f.readlines()
@@ -112,13 +112,13 @@ def read_lattice_file(lattice_file_path):
     # lattice_df["Alpha_X"] = -lattice_df["Beta_cm_X"].diff()/lattice_df["dS"]/2
     # lattice_df["Alpha_Y"] = -lattice_df["Beta_cm_Y"].diff()/lattice_df["dS"]/2
 
-    idx_ac = 793
-    a_ac_cm = 0.38
-    beta_ac_cm = lattice_df.loc[idx_ac, 'Beta_cm_X']
-    dispersion_ac_cm = lattice_df.loc[idx_ac, 'Dispersion_cm_X']
-    lattice_df['daccL'] = a_ac_cm\
-        / (np.sqrt(lattice_df['H']*beta_ac_cm)\
-        + np.abs(dispersion_ac_cm))
+    # idx_ac = 793
+    # a_ac_cm = 0.38
+    # beta_ac_cm = lattice_df.loc[idx_ac, 'Beta_cm_X']
+    # dispersion_ac_cm = lattice_df.loc[idx_ac, 'Dispersion_cm_X']
+    # lattice_df['daccL'] = a_ac_cm\
+    #     / (np.sqrt(lattice_df['H']*beta_ac_cm)\
+    #     + np.abs(dispersion_ac_cm))
 
     return lattice_df
 

@@ -141,6 +141,9 @@ class PathAssistant():
             fluctuation_waveforms_df["file_name"].apply(self.get_datetime)
         return fluctuation_waveforms_df.sort_values("file_datetime")\
             .reset_index(drop=True)
+    
+    def get_Aperture_X_df(self):
+        return pd.read_csv(self.get_6dsim_dir().fi("aperture_X.csv"))
 
 
 def get_srw_precalculated_spectrum_dir():

@@ -23,15 +23,23 @@ lamRF = c/fRF
 re = 2.817941e-13  # cm
 
 
-touschek_func_df = pd.read_csv("touschek_func.csv", header=None)
+touschek_func_df = pd.read_csv(os.path.join(
+    os.path.dirname(__file__), "touschek_func.csv"), header=None)
 CI = interpolate.interp1d(touschek_func_df.iloc[:, 0],
                           touschek_func_df.iloc[:, 1])
 
 
 def get_LamTska(lattice_df, Vrf, sp, ex, sz, Ibeam,
-                aperture_factor=1.0, use_transverse_acceptance_octupole=True, use_constant_transverse_acceptance=True, constant_acceptance_cm=5.0,
+                aperture_factor=1.0,
+                use_transverse_acceptance_octupole=False,
+                use_constant_transverse_acceptance=False,
+                constant_acceptance_cm=5.0,
+                use_transverse_acceptance_by_emittance=False,
+                emittance_acceptance_um=22.1,
+                use_variable_aperture_df=False,
+                variable_aperture_df=None,
                 gamma=gamma0):
-    """The result assumes ey=1. So it has to be deveded by sqrt(ey) in units of um"""
+    """The result assumes ey=1. So it has to be devided by sqrt(ey) in units of um"""
     V0 = Vrf
     etas = alpha-1/gamma**2
     Ks = (alpha*gamma**2-1)/(gamma**2-1)
@@ -43,7 +51,13 @@ def get_LamTska(lattice_df, Vrf, sp, ex, sz, Ibeam,
                                             - (np.pi/2-phiacc)*np.sin(phiacc))
     ldf = lattice_df
     if use_transverse_acceptance_octupole:
-        daccL = ldf['daccL'].values
+        idx_ac = 793
+        a_ac_cm = 0.38
+        beta_ac_cm = lattice_df.loc[idx_ac, 'Beta_cm_X']
+        dispersion_ac_cm = lattice_df.loc[idx_ac, 'Dispersion_cm_X']
+        daccL = (a_ac_cm\
+            / (np.sqrt(lattice_df['H']*beta_ac_cm)\
+            + np.abs(dispersion_ac_cm))).values
         dP_Psep = np.where(daccL < dP_Psep, daccL, dP_Psep)
     if use_constant_transverse_acceptance:
         daccL = \
@@ -52,6 +66,23 @@ def get_LamTska(lattice_df, Vrf, sp, ex, sz, Ibeam,
                + np.abs(ldf['Dispersion_cm_X']))).min() for i in ldf.index]
         daccL = np.array(daccL)
         dP_Psep = np.where(daccL < dP_Psep, daccL, dP_Psep)
+    if use_transverse_acceptance_by_emittance:
+        ap_vs_S = (1e-4*lattice.get_sigma_um(ldf['Beta_cm_X'],   
+                emittance_acceptance_um, ldf['Dispersion_cm_X'], sp))
+        daccL = np.asarray([
+            np.abs(ap_vs_S/(np.sqrt(ldf['Beta_cm_X']*ldf.loc[i, 'H'])+ldf['Dispersion_cm_X'].abs())).min()
+            for i in ldf.index])
+        dP_Psep = np.where(daccL < dP_Psep, daccL, dP_Psep)
+    if use_variable_aperture_df:
+        ap_vs_S = np.interp(ldf['S_cm'], variable_aperture_df['S_cm'],
+                    variable_aperture_df['Aperture_cm_X'],
+                    left=variable_aperture_df['Aperture_cm_X'].values[0],
+                    right=variable_aperture_df['Aperture_cm_X'].values[-1])
+        daccL = np.asarray([
+            np.abs(ap_vs_S/(np.sqrt(ldf['Beta_cm_X']*ldf.loc[i, 'H'])\
+                + ldf['Dispersion_cm_X'].abs())).min() for i in ldf.index])
+        dP_Psep = np.where(daccL < dP_Psep, daccL, dP_Psep)
+
     Gs = lamRF/2/np.pi*q/nus*np.abs(etas)
     ldf['Sigma_um_X'] = lattice.get_sigma_um(ldf['Beta_cm_X'], ex,
                                              ldf['Dispersion_cm_X'], sp)
@@ -60,7 +91,12 @@ def get_LamTska(lattice_df, Vrf, sp, ex, sz, Ibeam,
     Ne = Ibeam*1e-3/f0/e
     ldf['Sigma_um_Y'] = lattice.get_sigma_um(ldf['Beta_cm_Y'], 1,
                                             0, 0)
-    sum_components = (ldf['Beta_cm_X']/ex/1e-4)**1.5*CI(em)\
+    CIem=0
+    try:
+        CIem = CI(em)
+    except:
+        print(em)
+    sum_components = (ldf['Beta_cm_X']/ex/1e-4)**1.5*CIem\
         / (1+(sp*ldf['Beta_cm_X']*ldf['Phi_X']/ldf['Sigma_um_X']/1e-4)**2)**1.5\
         / (ldf['Sigma_um_X']*1e-4*1e-4*ldf['Sigma_um_Y']*em)*ldf['dS']/(1/f0)
     LamTska = Ne*re**2/(8*np.pi*gamma**5*sz)*sum_components.sum()
