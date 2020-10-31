@@ -6,6 +6,26 @@ import matplotlib.pyplot as plt
 from config import get_from_config
 import fur.path_assistant as path_assistant
 from lattice import lattice
+from scipy import integrate
+from scipy.special import iv
+
+
+def ExI0(a, b):
+    if b < 40:
+        return np.exp(-a)*iv(0, b)
+    else:
+        return np.exp(-a+b)/np.sqrt(2*np.pi*b)\
+            * (1+1/8/b+9/128/b**2+9*25/6/8**3/b**3)
+
+
+def Ku(u, um, B1, B2):
+    return np.sqrt(u/(1+u))*ExI0(B1*u, B2*u)\
+        * ((2+1/u)**2*(u/um/(1+u)-1)+1-np.sqrt(um*(1+u)/u)
+           - 1/2/u*(4+1/u)*np.log(u/um/(1+u)))
+
+
+def Itsk(um, B1, B2):
+    return integrate.quad(lambda u: Ku(u, um, B1, B2), um, np.inf)
 
 
 gamma0 = get_from_config("gamma")
@@ -101,3 +121,46 @@ def get_LamTska(lattice_df, Vrf, sp, ex, sz, Ibeam,
         / (ldf['Sigma_um_X']*1e-4*1e-4*ldf['Sigma_um_Y']*em)*ldf['dS']/(1/f0)
     LamTska = Ne*re**2/(8*np.pi*gamma**5*sz)*sum_components.sum()
     return LamTska
+
+
+def get_Touchek_Lifetime(lattice_df, Vrf, sp, ex, ey, sz, Ibeam,
+                         aperture_factor=1.0,
+                         gamma=gamma0):
+    """The result assumes ey=1. So it has to be devided by sqrt(ey) in units of um"""
+    V0 = Vrf
+    ldf = lattice_df
+    etas = alpha-1/gamma**2
+    Ks = (alpha*gamma**2-1)/(gamma**2-1)
+    phiacc = np.arcsin(VSR/V0)
+    nus0 = np.sqrt(q*V0*np.abs(Ks)/2/np.pi/me/gamma)
+    nus = nus0*np.sqrt(np.cos(phiacc))
+    fs = f0*nus
+    dP_Psep = aperture_factor*2*nus0/q/np.abs(etas)*np.sqrt(np.cos(phiacc)
+                                            - (np.pi/2-phiacc)*np.sin(phiacc))
+    Gs = lamRF/2/np.pi*q/nus*np.abs(etas)
+
+
+    ldf['Sigma_um_X'] = lattice.get_sigma_um(ldf['Beta_cm_X'], ex,
+                                            ldf['Dispersion_cm_X'], sp)
+
+
+    aux1 = ldf['Beta_cm_X']/ex/1e-4/(
+            1+(sp*ldf['Beta_cm_X']*ldf["Phi_X"]/ldf["Sigma_um_X"]/1e-4)**2)
+
+    aux2 = ldf['Beta_cm_Y']/ey/1e-4
+
+    B1 = 1/2/gamma**2*np.abs(aux1 + aux2)
+    B2 = 1/2/gamma**2*np.abs(aux1 - aux2)
+
+    S33 = 1/sp**2 + ldf['H']/ex/1e-4
+
+    Ne = Ibeam*1e-3/f0/e
+
+    um = dP_Psep**2
+    Itski = np.array([Itsk(um, b1, b2)[0] for b1, b2 in zip(B1, B2)])
+
+    sum_components = Itski/np.sqrt(S33)*ldf['dS']/(1/f0)
+    LamTska = Ne*re**2/(8*np.sqrt(np.pi)*gamma**4*ex*1e-4*ey*1e-4*sz*sp)\
+        * sum_components.sum()
+
+    return 1/LamTska
