@@ -123,10 +123,10 @@ def get_LamTska(lattice_df, Vrf, sp, ex, sz, Ibeam,
     return LamTska
 
 
-def get_Touchek_Lifetime(lattice_df, Vrf, sp, ex, ey, sz, Ibeam,
+def get_Touschek_Lifetime_Lebedev(lattice_df, Vrf, sp, ex, ey, sz, Ibeam,
                          aperture_factor=1.0,
-                         gamma=gamma0):
-    """The result assumes ey=1. So it has to be devided by sqrt(ey) in units of um"""
+                         gamma=gamma0,
+                         test_dict=None):
     V0 = Vrf
     ldf = lattice_df
     etas = alpha-1/gamma**2
@@ -162,5 +162,111 @@ def get_Touchek_Lifetime(lattice_df, Vrf, sp, ex, ey, sz, Ibeam,
     sum_components = Itski/np.sqrt(S33)*ldf['dS']/(1/f0)
     LamTska = Ne*re**2/(8*np.sqrt(np.pi)*gamma**4*ex*1e-4*ey*1e-4*sz*sp)\
         * sum_components.sum()
+    
+    if test_dict is not None:
+        test_dict['Integral'] = Itski
 
     return 1/LamTska
+
+
+def get_Touschek_Lifetime_Valishev(lattice_df, Vrf, sp, ex, ey, sz, Ibeam,
+                                   aperture_factor=1.0,
+                                   gamma=gamma0,
+                                   integration_upper_lim_rel=30,
+                                   test_dict=None):
+    V0 = Vrf
+    ldf = lattice_df
+    etas = alpha-1/gamma**2
+    Ks = (alpha*gamma**2-1)/(gamma**2-1)
+    phiacc = np.arcsin(VSR/V0)
+    nus0 = np.sqrt(q*V0*np.abs(Ks)/2/np.pi/me/gamma)
+    nus = nus0*np.sqrt(np.cos(phiacc))
+    fs = f0*nus
+    dP_Psep = aperture_factor*2*nus0/q/np.abs(etas)*np.sqrt(np.cos(phiacc)
+                                            - (np.pi/2-phiacc)*np.sin(phiacc))
+    eta = dP_Psep
+    Ne = Ibeam*1e-3/f0/e
+
+    NN = len(ldf.index)
+    M = np.zeros(shape=(NN, 5, 5))
+    M[:,3,1] = np.sqrt(ldf['Beta_cm_X'])
+    M[:,2,1] = ldf['Alpha_X']/np.sqrt(ldf['Beta_cm_X'])
+    M[:,2,2] = 1/np.sqrt(ldf['Beta_cm_X'])
+    M[:,1,3] = np.sqrt(ldf['Beta_cm_Y'])
+    M[:,0,3] = ldf['Alpha_Y']/np.sqrt(ldf['Beta_cm_Y'])
+    M[:,0,4] = 1/np.sqrt(ldf['Beta_cm_Y'])
+
+    e1, e2 = 1e-4*ex, 1e-4*ey
+
+    Axx = (M[:, 2, 1]**2+M[:, 2, 2]**2)/2/e1+(M[:, 2, 3]**2+M[:, 2, 4]**2)/2/e2
+    Ayy = (M[:, 0, 1]**2+M[:, 0, 2]**2)/2/e1+(M[:, 0, 3]**2+M[:, 0, 4]**2)/2/e2
+    Apxpx = (M[:, 3, 1]**2+M[:, 3, 2]**2)/2/e1+(M[:, 3, 3]**2+M[:, 3, 4]**2)/2/e2
+    Apypy = (M[:, 1, 1]**2+M[:, 1, 2]**2)/2/e1+(M[:, 1, 3]**2+M[:, 1, 4]**2)/2/e2
+    Axpx = -2*((M[:, 3, 1]*M[:, 2, 1]+M[:, 3, 2]*M[:, 2, 2])/2/e1
+            + (M[:, 3, 3]*M[:, 2, 3]+M[:, 3, 4]*M[:, 2, 4])/2/e2)
+    Aypy = -2*((M[:, 1, 1]*M[:, 0, 1]+M[:, 1, 2]*M[:, 0, 2])/2/e1
+            + (M[:, 1, 3]*M[:, 0, 3]+M[:, 1, 4]*M[:, 0, 4])/2/e2)
+    Axy = 2*((M[:, 2, 1]*M[:, 0, 1]+M[:, 2, 2]*M[:, 0, 2])/2/e1
+            + (M[:, 2, 3]*M[:, 0, 3]+M[:, 2, 4]*M[:, 0, 4])/2/e2)
+    Apxpy = 2*((M[:, 3, 1]*M[:, 1, 1]+M[:, 3, 2]*M[:, 1, 2])/2/e1
+            + (M[:, 3, 3]*M[:, 1, 3]+M[:, 3, 4]*M[:, 1, 4])/2/e2)
+    Axpy = -2*((M[:, 2, 1]*M[:, 1, 1]+M[:, 2, 2]*M[:, 1, 2])/2/e1
+            + (M[:, 2, 3]*M[:, 1, 3]+M[:, 2, 4]*M[:, 1, 4])/2/e2)
+    Aypx = -2*((M[:, 3, 1]*M[:, 0, 1]+M[:, 3, 2]*M[:, 0, 2])/2/e1
+            + (M[:, 3, 3]*M[:, 0, 3]+M[:, 3, 4]*M[:, 0, 4])/2/e2)
+
+    Fx = Apxpx-Axpx**2/4/Axx-1/4*(Aypx-Axpx*Axy/2/Axx)**2/(Ayy-Axy**2/4/Axx)
+    Fy = Apypy-Axpy**2/4/Axx-1/4*(Aypy-Axpy*Axy/2/Axx)**2/(Ayy-Axy**2/4/Axx)
+    Fpx = Axx - Axpx**2/4/Apxpx-1/4*(Axpy-Axpx*Apxpy/2/Apxpx)**2\
+        / (Apypy-Apxpy**2/4/Apxpx)
+    Fpy = Ayy-Aypx**2/4/Apxpx-1/4*(Aypy-Aypx*Apxpy/2/Apxpx)**2\
+        / (Apypy-Apxpy**2/4/Apxpx)
+    Fxy = Apxpy/2-Axpx*Axpy/2/Axx-1/4*(Aypx-Axpx*Axy/2/Axx)*(Aypy-Axpy*Axy/2/Axx)\
+        / (Ayy-Axy**2/4/Axx)
+    Fpxpy = Axy/2-Axpx*Aypx/4/Apxpx-1/4*(Aypy-Aypx*Apxpy/2/Apxpx)\
+        * (Axpy-Axpx*Apxpy/2/Apxpx)/(Apypy-Apxpy**2/4/Apxpx)
+    
+    def Pfunc(k):
+        Axxk, Ayyk, Axyk, Fxk, Fyk, Fxyk = \
+            Axx[k], Ayy[k], Axy[k], Fx[k], Fy[k], Fxy[k]
+
+        def func(Q):
+            return 1/8/e1**2/e2**2/(Axxk*Ayyk-1/4*Axyk**2)\
+                / np.sqrt(Fxk*Fyk-Fxyk**2)*np.exp(-Q**2*(Fxk/2+Fyk/2))\
+                * iv(0, Q**2*np.sqrt(1/4*(Fyk-Fxk)**2+Fxyk**2))*Q
+        return func
+    
+    def s0(q):
+        aux1 = re**2*(1+2*q**2)**2*np.pi**2/2/q**4/(1+q**2)
+        aux2 = q**2/(1+q**2)*(1/eta**2)-1+np.log(np.sqrt(1+q**2)/q*eta)
+        aux3 = (q**2/(1+2*q**2))**2*(1-eta*np.sqrt(1+q**2)/q
+                                    - 4*np.log(eta*np.sqrt(1+q**2)/q))
+        return aux1*(aux2+aux3)
+    
+    qm = eta/np.sqrt(1-eta**2)
+
+    def integrand(k):
+        Pf = Pfunc(k)
+
+        def res(Q):
+            return Q/2*np.sqrt(1+(Q/2)**2)*s0(Q/2)*Pf(Q/gamma)
+        return res
+    
+    B = []
+    upper_lim_coef = integration_upper_lim_rel
+    for k in ldf.index:
+        upper_limit = gamma/np.sqrt(Fx[k]+Fy[k])*upper_lim_coef
+        f_int = integrand(k)
+        B.append(integrate.quad(f_int, 2*qm, upper_limit)[0])
+    B = np.array(B)
+
+    dN = 2*c/gamma**3*Ne**2/(64*np.pi**(3/2)*e1**2*e2**2*sz)\
+        / (Apypy*Apxpx-1/4*Apxpy**2)\
+        / np.sqrt(Fpx*Fpy-Fpxpy**2) * B
+    
+    DN = (dN*ldf['dS']).sum()/ldf['dS'].sum()
+    tau = Ne/DN
+    if test_dict is not None:
+        test_dict['Integral'] = B/(1/8/e1**2/e2**2/(Axx*Ayy-1/4*Axy**2)
+                                   / np.sqrt(Fx*Fy-Fxy**2))
+    return tau

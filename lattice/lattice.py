@@ -100,6 +100,7 @@ def read_lattice_file(lattice_file_path):
         "Alpha_Y": data_chunks[4][1]
     })
     lattice_df = lattice_df.drop_duplicates("S_cm")
+    lattice_df = lattice_df.reset_index(drop=True)
     dS = lattice_df["S_cm"].diff().fillna(method='bfill')
     dDx = lattice_df["Dispersion_cm_X"].diff().fillna(method='bfill')
     lattice_df["dS"] = dS
