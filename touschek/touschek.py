@@ -164,7 +164,7 @@ def get_Touschek_Lifetime_Lebedev(lattice_df, Vrf, sp, ex, ey, sz, Ibeam,
         * sum_components.sum()
     
     if test_dict is not None:
-        test_dict['Integral'] = Itski
+        test_dict['Itski'] = Itski
 
     return 1/LamTska
 
@@ -267,6 +267,5 @@ def get_Touschek_Lifetime_Valishev(lattice_df, Vrf, sp, ex, ey, sz, Ibeam,
     DN = (dN*ldf['dS']).sum()/ldf['dS'].sum()
     tau = Ne/DN
     if test_dict is not None:
-        test_dict['Integral'] = B/(1/8/e1**2/e2**2/(Axx*Ayy-1/4*Axy**2)
-                                   / np.sqrt(Fx*Fy-Fxy**2))
+        test_dict['dN'] = dN
     return tau

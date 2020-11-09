@@ -112,7 +112,8 @@ def read_lattice_file(lattice_file_path):
         + lattice_df['Beta_cm_X']*lattice_df['Phi_X']**2
     # lattice_df["Alpha_X"] = -lattice_df["Beta_cm_X"].diff()/lattice_df["dS"]/2
     # lattice_df["Alpha_Y"] = -lattice_df["Beta_cm_Y"].diff()/lattice_df["dS"]/2
-
+    # lattice_df['Alpha_X'] = lattice_df['Alpha_X'].fillna(method='bfill')
+    # lattice_df['Alpha_Y'] = lattice_df['Alpha_Y'].fillna(method='bfill')
     # idx_ac = 793
     # a_ac_cm = 0.38
     # beta_ac_cm = lattice_df.loc[idx_ac, 'Beta_cm_X']
