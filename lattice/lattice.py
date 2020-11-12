@@ -416,3 +416,116 @@ def get_e_um_X_dict(cameras_df, dpp=0):
     for cam, val in zip(no_m4r["Name"], ex_vals):
         ex_dict["e_um_X_"+cam] = val
     return ex_dict
+
+
+# Coupled lattice below
+
+U = np.array([
+    [0, 1, 0, 0],
+    [-1, 0, 0, 0],
+    [0, 0, 0, 1],
+    [0, 0, -1, 0]
+])
+
+
+def BuildXi(Xi, D, sp):
+    res = np.zeros(shape=(5, 5))
+    res[:4, :4] = Xi
+    res[4, 4] = D@Xi@D+1/sp**2
+    res[4, :4] = Xi@D
+    res[:4, 4] = res[4, :4]
+    return res
+
+class CoupledLattice:
+    def __init__(self, file_path, gamma=gamma0):
+        self.gamma = gamma
+        with open(file_path) as f:
+            f.read(1)
+            ldf = pd.read_table(f, delim_whitespace=True)
+        cameras_df = pd.DataFrame({
+            "Name": camera_names,
+            "S[cm]": camera_positions
+        })
+        for col in ldf.columns[3:]:
+            cameras_df[col] = np.interp(cameras_df["S[cm]"],
+                                        ldf["S[cm]"],
+                                        ldf[col])
+        cameras_df["ACNET_device_X"] = acnet_devices_X
+        cameras_df["ACNET_device_Y"] = acnet_devices_Y
+        
+        self.cameras_df = cameras_df[cameras_df["Name"].isin(active_cameras)]
+        self.ldf = ldf
+    
+    def get_density_matrices(self, ldf, e1, e2, sp):
+        ldf['nu1'] = 2*np.pi*ldf['Teta1/(2*PI)']
+        ldf['nu2'] = 2*np.pi*ldf['Teta2/(2*PI)']
+        N = len(ldf.index)
+        c1 = np.cos(ldf['nu1'])
+        c2 = np.cos(ldf['nu2'])
+        s1 = np.sin(ldf['nu1'])
+        s2 = np.sin(ldf['nu2'])
+        V = np.zeros(shape=(N, 4, 4))
+        V[:, 0, 0] = np.sqrt(ldf['BetaX1'])
+        V[:, 0, 2] = np.sqrt(ldf['BetaX2'])*c2
+        V[:, 0, 3] = -np.sqrt(ldf['BetaX2'])*s2
+        V[:, 1, 0] = -ldf['AlfaX1']/np.sqrt(ldf['BetaX1'])
+        V[:, 1, 1] = (1-ldf['U'])/np.sqrt(ldf['BetaX1'])
+        V[:, 1, 2] = (ldf['U']*s2-ldf['AlfaX2']*c2)/np.sqrt(ldf['BetaX2'])
+        V[:, 1, 3] = (ldf['U']*c2+ldf['AlfaX2']*s2)/np.sqrt(ldf['BetaX2'])
+        V[:, 2, 0] = np.sqrt(ldf['BetaY1'])*c1
+        V[:, 2, 1] = -np.sqrt(ldf['BetaY1'])*s1
+        V[:, 2, 2] = np.sqrt(ldf['BetaY2'])
+        V[:, 3, 0] = (ldf['U']*s1-ldf['AlfaY1']*c1)/np.sqrt(ldf['BetaY1'])
+        V[:, 3, 1] = (ldf['U']*c1+ldf['AlfaY1']*s1)/np.sqrt(ldf['BetaY1'])
+        V[:, 3, 2] = -ldf['AlfaY2']/np.sqrt(ldf['BetaY2'])
+        V[:, 3, 3] = (1-ldf['U'])/np.sqrt(ldf['BetaY2'])
+        D = np.zeros(shape=(N, 4))
+        D[:, 0] = ldf['DspX']
+        D[:, 1] = ldf['DspXp']
+        D[:, 2] = ldf['DspY']
+        D[:, 3] = ldf['DspYp']
+        # Sigma = V@np.diag([e1, e1, e2, e2])@(np.transpose(V, axes=(0, 2, 1)))
+        Xi = U@V@np.diag([1/e1, 1/e1, 1/e2, 1/e2]
+                         )@np.transpose(V, axes=(0, 2, 1))@np.transpose(U)
+        Xitot = np.array([BuildXi(xi, d, sp) for xi, d in zip(Xi, D)])
+        Sigmatot = np.array([np.linalg.inv(sl) for sl in Xitot])
+        Xitheta = np.array([
+            np.array([
+                [m[1, 1], m[1, 3], m[1, 4]],
+                [m[3, 1], m[3, 3], m[3, 4]],
+                [m[4, 1], m[4, 3], m[4, 4]]
+            ]) for m in Xitot
+        ])
+        Sigmax = np.array([
+            np.array([
+                [m[0, 0], m[0, 2]],
+                [m[2, 0], m[2, 2]]
+            ]) for m in Sigmatot
+        ])
+        Gamma = np.diag([1, 1, 1/self.gamma])
+        SigmathetaBF = Gamma@np.linalg.inv(Xitheta)@Gamma
+        stheta2BF = np.linalg.eigvals(SigmathetaBF)
+        return Sigmax, Sigmatot
+
+    def get_cameras_sx_sy(self, e1, e2, sp):
+        Sigmax, Sigmatheta = self.get_density_matrices(self.cameras_df, e1, e2, sp)
+        return np.sqrt(Sigmax[:,0,0]), np.sqrt(Sigmax[:,1,1])
+
+    def get_s1_s2_th1_th2(self, Sigmax, Sigmatheta):
+        part1 = (Sigmax[:, 0, 0]+Sigmax[:, 1, 1])
+        part2 = np.sqrt((Sigmax[:, 0, 0]-Sigmax[:, 1, 1])**2
+                        + 4*Sigmax[:, 0, 1]**2)
+        s2 = 1/np.sqrt(2)*np.sqrt(part1+part2)
+        s1 = 1/np.sqrt(2)*np.sqrt(part1-part2)
+        
+        
+    
+    
+    
+    
+
+    
+
+
+
+
