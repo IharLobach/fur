@@ -35,7 +35,7 @@
             300
         ]
     ],
-    "Measured_photons_per_electron": 0.008820875499988542,
+    "Measured_photons_per_electron": 0.008798823311458544,
     "Predicted_photons_per_electron_wigrad": 0.009125786374792258,
     "Beam_current_to_Sum_channel_ampl_V/mA": 0.21585382217183424,
     "Beam_energy_error_MeV": 1,
