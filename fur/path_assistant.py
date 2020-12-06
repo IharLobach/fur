@@ -18,6 +18,8 @@ srw_Ex_3D_with_losses_file_path = os.path.join(
 srw_Ey_3D_with_losses_file_path = os.path.join(
     srw_precalculated_spectrum_folder, "Ey_3D_with_losses.npy")
 prl_images_path = get_from_config("PRL_images")
+plot_style_sheets_path = os.path.join(
+    get_from_config("repository_folder"), "plot_style_sheets")
 
 
 def show_shift_folders():
@@ -152,3 +154,7 @@ def get_srw_precalculated_spectrum_dir():
 
 def get_PRL_images_dir():
     return WorkingDirectory(prl_images_path)
+
+
+def get_plot_style_sheet(name):
+    return os.path.join(plot_style_sheets_path, name+".mplstyle")

@@ -1,0 +1,11 @@
+font.family: serif
+text.usetex: True
+pgf.rcfonts: False
+pgf.texsystem: xelatex
+font.size: 28
+legend.fontsize: 28
+axes.labelsize: 30
+lines.linewidth : 3
+lines.markersize : 10
+errorbar.capsize: 4
+pgf.preamble: \usepackage{amsmath}\usepackage{unicode-math}\usepackage{amsthm}\setmainfont{Times}\DeclareMathAlphabet{\mathcal}{OMS}{cmsy}{m}{n}\let\mathbb\relax\DeclareMathAlphabet{\mathbb}{U}{msb}{m}{n}\usepackage{siunitx}
