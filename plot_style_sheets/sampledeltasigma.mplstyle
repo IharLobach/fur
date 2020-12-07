@@ -3,12 +3,12 @@ text.usetex: True
 pgf.rcfonts: False
 pgf.texsystem: xelatex
 font.size: 30
-xtick.labelsize: 32
-ytick.labelsize: 32
+xtick.labelsize: 46
+ytick.labelsize: 46
 legend.fontsize: 28
-axes.labelsize: 30
-axes.titlesize: 30
-lines.linewidth : 3
+axes.labelsize: 44
+axes.titlesize: 44
+lines.linewidth : 4
 lines.markersize : 10
 errorbar.capsize: 4
 legend.borderpad:     0.2
@@ -19,9 +19,9 @@ legend.handletextpad: 0.3
 legend.borderaxespad: 0.2
 legend.columnspacing: 2.0
 xtick.direction:     in 
-xtick.major.size:    7
-xtick.major.width:   3
+xtick.major.size:    9
+xtick.major.width:   4
 ytick.direction:     in 
-ytick.major.size:    7
-ytick.major.width:   3
-axes.linewidth:     2
+ytick.major.size:    9
+ytick.major.width:   4
+axes.linewidth:     3
