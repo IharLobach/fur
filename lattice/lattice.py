@@ -4,8 +4,8 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import os
 labeb_fs = 30
-annot_fs = 20
-legend_fs = 20
+annot_fs = 24
+legend_fs = 24
 text_fs = annot_fs
 marker_size = 7
 params = {'axes.labelsize': labeb_fs}
@@ -133,7 +133,7 @@ def add_vertical_lines_at_camera_positions(ax, color='green'):
 def annotate_camera_positions(ax):
     y_pos_annotate = np.mean(ax.get_ylim())
     for name, p in zip(camera_names, camera_positions):
-        ax.annotate(name, (p, y_pos_annotate), fontsize=annot_fs)
+        ax.annotate(name, (10+p, y_pos_annotate), fontsize=annot_fs)
 
 
 def add_undulator_shaded_area(ax, color='blue'):
@@ -144,18 +144,21 @@ def add_undulator_shaded_area(ax, color='blue'):
 def annotate_undulator(ax):
     y_pos_annotate = np.mean(ax.get_ylim())
     ax.annotate(undulator_name,
-                (undulator_range[1], y_pos_annotate), fontsize=annot_fs)
+                (10+undulator_range[1], y_pos_annotate), fontsize=annot_fs)
 
 
-def plot_lattice(lattice_df):
-    fig, (ax0, ax1) = plt.subplots(2, figsize=(20, 15))
-    ax0.plot(lattice_df["S_cm"], lattice_df["Beta_cm_X"], label="Beta_cm_X")
-    ax0.plot(lattice_df["S_cm"], lattice_df["Beta_cm_Y"], label="Beta_cm_Y")
-    ax0.set_ylabel("Beta_cm_X, Beta_cm_Y")
-    ax0.legend(fontsize=legend_fs)
+def plot_lattice(lattice_df, axs=None):
+    if axs is None:
+        fig, (ax0, ax1) = plt.subplots(2, figsize=(20, 15))
+    else:
+        ax0, ax1 = axs
+    ax0.plot(lattice_df["S_cm"], lattice_df["Beta_cm_X"], label=r"$\beta_x$")
+    ax0.plot(lattice_df["S_cm"], lattice_df["Beta_cm_Y"], label=r"$\beta_y$")
+    ax0.set_ylabel(r"$\beta_x$, $\beta_y$ (cm)")
+    ax0.legend(fontsize=legend_fs, loc='upper center')
     ax1.plot(lattice_df["S_cm"], lattice_df["Dispersion_cm_X"])
-    ax1.set_ylabel("Dispersion_cm_X")
-    ax1.set_xlabel("S_cm")
+    ax1.set_ylabel(r"$D_x$ (cm)")
+    ax1.set_xlabel(r"$S$ (cm)")
     # ax2.plot(lattice_df["S_cm"], lattice_df["Alpha_X"], label="Alpha_X")
     # ax2.plot(lattice_df["S_cm"], lattice_df["Alpha_Y"], label="Alpha_Y")
     # ax2.set_ylabel("Alpha_X, Alpha_Y", fontsize=fs)
@@ -164,9 +167,11 @@ def plot_lattice(lattice_df):
     for ax in (ax0, ax1):
         add_vertical_lines_at_camera_positions(ax)
     annotate_camera_positions(ax1)
+    add_undulator_shaded_area(ax=ax0)
     add_undulator_shaded_area(ax=ax1)
     annotate_undulator(ax1)
-    plt.show()
+    if axs is None:
+        plt.show()
 
 
 def get_sigma_um(beta_cm, e_um, dispersion_cm, dpp):
