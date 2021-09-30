@@ -49,10 +49,13 @@ d2.extrusion.rotate(angle=-pi/2, axis=vec(0, 0, 1), origin=d2.pos)
 
 #------------------------------------------
 # labels
-kwl = dict(height=32, border=4, font='sans')
+kwl = dict(height=24, border=4, font='sans')
 label(pos=bs1.pos,
       text='Beam splitter', xoffset=-40,
       yoffset=-100, space=40, **kwl)
 label(pos=d2.pos,
-      text='Detector', xoffset=-20,
+      text='SPAD2', xoffset=-20,
       yoffset=80, space=20, **kwl)
+label(pos=d1.pos,
+      text='SPAD1', xoffset=80,
+      yoffset=-10, space=40, **kwl)

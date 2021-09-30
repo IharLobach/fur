@@ -61,9 +61,9 @@ w_pos = 0.5*(m2.pos+bs2.pos)
 w1 = Wedge(w_pos-w_sep_z-w_shift_y)
 w1.extrusion.rotate(angle=pi/2, axis=vec(0, 1, 0), origin=w1.pos)
 w2 = Wedge(w_pos+w_sep_z+w_shift_y)
-w2.extrusion.rotate(angle=-pi/2, axis=vec(0, 1, 0), origin=w2.pos)
-w2.extrusion.rotate(angle=pi, axis=vec(0, 0, 1), origin=w2.pos)
-
+w2.extrusion.rotate(angle=-pi/2, axis=vec(0, -1, 0), origin=w2.pos)
+w2.extrusion.rotate(angle=pi, axis=vec(1, 0, 0), origin=w2.pos)
+# w2.extrusion.rotate(angle=pi, axis=vec(0, 1, 0), origin=w2.pos)
 
 
 #------------------------------------------
@@ -73,10 +73,13 @@ label(pos=m1.pos,
       text='Mirror', xoffset=20,
       yoffset=-100, space=30, **kwl)
 label(pos=bs1.pos,
-      text='Beam splitter', xoffset=-40,
+      text='Beamsplitter', xoffset=-40,
       yoffset=-100, space=40, **kwl)
+label(pos=d2.pos,
+      text='SPAD2', xoffset=20,
+      yoffset=80, space=20, **kwl)
 label(pos=d1.pos,
-      text='Detector', xoffset=20,
+      text='SPAD1', xoffset=20,
       yoffset=-80, space=20, **kwl)
 label(pos=w_pos,
       text='Double wedge', xoffset=-40,

@@ -197,26 +197,26 @@ def show_sigma_fit(lattice_df, cameras_df, axis, emittance_um, dpp=None):
                 emittance_um,
                 dispersion_cm,
                 dpp_),
-            label="sigma_um_"+axis)
+            label="Fit $\sigma_"+axis.lower()+"$")
     no_m4r = cameras_df[cameras_df["Name"].isin(active_cameras)]
     add_vertical_lines_at_camera_positions(ax)
     annotate_camera_positions(ax)
     ax.plot(no_m4r["S_cm"], no_m4r["Measured_sigma_um_"+axis],
-            marker='o', linestyle='none', label="Measured_sigma_um_"+axis,
+            marker='o', linestyle='none', label="Measured $\sigma_"+axis.lower()+"$",
             markersize=marker_size)
-    ax.set_ylabel("sigma_um_"+axis)
-    ax.set_xlabel("S_cm")
+    ax.set_ylabel("$\sigma_"+axis.lower()+"$ (\SI{}{\micro m})")
+    ax.set_xlabel("S (cm)")
     add_undulator_shaded_area(ax)
     annotate_undulator(ax)
-    ax.text(0.9, 0.9, "emittance_"+axis+" = {:3f} um".format(emittance_um),
-            verticalalignment='bottom', horizontalalignment='right',
-            transform=ax.transAxes, fontsize=text_fs)
-    ax.text(0.9, 0.8, s,
-            verticalalignment='bottom', horizontalalignment='right',
-            transform=ax.transAxes, fontsize=text_fs)
+    # ax.text(0.9, 0.9, "emittance_"+axis+" = {:3f} um".format(emittance_um),
+    #         verticalalignment='bottom', horizontalalignment='right',
+    #         transform=ax.transAxes, fontsize=text_fs)
+    # ax.text(0.9, 0.8, s,
+    #         verticalalignment='bottom', horizontalalignment='right',
+    #         transform=ax.transAxes, fontsize=text_fs)
 
     ax.set_xlim(0, ax.get_xlim()[1])
-    ax.legend(fontsize=legend_fs)
+    ax.legend(fontsize=legend_fs, loc='lower center')
     plt.show()
 
 
