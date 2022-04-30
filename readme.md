@@ -1,5 +1,10 @@
 Fluctuations in Undulator Radiation
 
+[https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.134802](https://journals.aps.org/prl/abstract/10.1103/PhysRevLett.126.134802)
+[https://journals.aps.org/prab/abstract/10.1103/PhysRevAccelBeams.24.040701](https://journals.aps.org/prab/abstract/10.1103/PhysRevAccelBeams.24.040701)
+[https://journals.aps.org/prab/abstract/10.1103/PhysRevAccelBeams.23.090703](https://journals.aps.org/prab/abstract/10.1103/PhysRevAccelBeams.23.090703)
+
+
 See [https://github.com/IharLobach/ursse](https://github.com/IharLobach/ursse) for experiments with a single electron.
 
 
