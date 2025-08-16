@@ -9,11 +9,13 @@
 #include <stdio.h>
 #include <stdlib.h> /* atoi */
 #include <random>
+#include <vector>
 #define BOOST_PYTHON_MAX_ARITY 17
 #include <boost/python.hpp>
 #include <boost/python/tuple.hpp>
 #include <boost/python/numpy.hpp>
 #include <boost/math/special_functions/sinc.hpp>
+#include <boost/math/special_functions/bessel.hpp>
 namespace p = boost::python;
 namespace np = boost::python::numpy;
 
@@ -41,7 +43,7 @@ double besselj(int n, double x)
     {
         aux2 = pow(-1, n);
     }
-    return aux1 * aux2 * std::cyl_bessel_j(int(abs(n)), abs(x));
+    return aux1 * aux2 * boost::math::cyl_bessel_j(static_cast<double>(std::abs(n)), std::abs(x));
 }
 
 bool isinEllipse(double x, double y, double xmax, double ymax)
@@ -137,7 +139,7 @@ np::ndarray CalcSum(np::ndarray params, np::ndarray spectral_transmission, doubl
             res_idx += 1;
         }
     }
-    Py_intptr_t sh[1] = {res.size()};
+    Py_intptr_t sh[1] = {static_cast<Py_intptr_t>(res.size())};
     np::ndarray result = np::zeros(1, sh, np::dtype::get_builtin<double>());
     std::copy(res.begin(), res.end(), reinterpret_cast<double*>(result.get_data()));
 
@@ -233,7 +235,7 @@ np::ndarray CalcM(np::ndarray params, np::ndarray spectral_transmission, double 
             res_idx+=1;
         }
     }
-    Py_intptr_t sh[1] = {res.size()};
+    Py_intptr_t sh[1] = {static_cast<Py_intptr_t>(res.size())};
     np::ndarray result = np::zeros(1, sh, np::dtype::get_builtin<std::complex<double>>());
     std::copy(res.begin(), res.end(), reinterpret_cast<std::complex<double>*>(result.get_data()));
 
@@ -413,7 +415,7 @@ np::ndarray CalcMFromPrecalculatedFieldAmps(np::ndarray input_npy, np::ndarray s
             res_idx += 1;
         }
     }
-    Py_intptr_t sh[1] = {res.size()};
+    Py_intptr_t sh[1] = {static_cast<Py_intptr_t>(res.size())};
     np::ndarray result = np::zeros(1, sh, np::dtype::get_builtin<std::complex<double>>());
     std::copy(res.begin(), res.end(), reinterpret_cast<std::complex<double> *>(result.get_data()));
 
@@ -423,7 +425,6 @@ np::ndarray CalcMFromPrecalculatedFieldAmps(np::ndarray input_npy, np::ndarray s
 BOOST_PYTHON_MODULE(coherent_modes_cpp)
 {
     using namespace boost::python;
-    Py_Initialize();
     np::initialize();
     def("CalcM", CalcM);
     def("CalcSum", CalcSum);
